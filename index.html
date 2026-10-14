@@ -1,0 +1,2682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="author" content="sasinandan">
+    <title>Dino Badminton - BWF World Tour Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Retro Pixel & Monospace Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f7f7;
+            --fg-color: #535353;
+            --fg-muted: #8a8a8a;
+            --fg-subtle: #d4d4d4;
+            --surface-color: #ebebeb;
+            --border-color: #535353;
+        }
+
+        body.dark-mode {
+            --bg-color: #18181b;
+            --fg-color: #e4e4e7;
+            --fg-muted: #9ca3af;
+            --fg-subtle: #3f3f46;
+            --surface-color: #27272a;
+            --border-color: #e4e4e7;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--fg-color);
+            font-family: 'JetBrains Mono', monospace;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            touch-action: none;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .retro-btn {
+            background-color: var(--bg-color);
+            color: var(--fg-color);
+            border: 2px solid var(--border-color);
+            box-shadow: 2px 2px 0px var(--border-color);
+            transition: transform 0.06s ease, box-shadow 0.06s ease, background-color 0.12s ease;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .retro-btn:hover {
+            background-color: var(--surface-color);
+        }
+
+        .retro-btn:active, .retro-btn.active-press {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--border-color);
+        }
+
+        .retro-btn.selected {
+            background-color: var(--fg-color);
+            color: var(--bg-color);
+        }
+
+        .retro-btn.locked-arena {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .retro-btn.rebinding {
+            outline: 2px dashed var(--fg-color);
+            animation: pulse-fast 0.6s infinite alternate;
+        }
+
+        @keyframes pulse-fast {
+            from { opacity: 1; }
+            to { opacity: 0.45; }
+        }
+
+        .canvas-frame {
+            border: 3px solid var(--border-color);
+            box-shadow: 5px 5px 0px var(--border-color);
+            background-color: var(--bg-color);
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between p-1.5 sm:p-2.5 select-none">
+
+    <!-- SINGLE-LEVEL TOP NAVIGATION & CUSTOMIZATION BAR -->
+    <header class="w-full max-w-6xl mx-auto shrink-0">
+        <div class="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 border-b-2" style="border-color: var(--border-color);">
+            
+            <!-- Brand & Live Score Pill -->
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded border-2 shrink-0" style="border-color: var(--border-color); background-color: var(--surface-color);">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 2h8v2h2v5h-2v2h-3v2h3v2h-2v2h2v5h-2v-3h-2v3H9v-4H7v-2H5v-2H3v-4h2v2h2v-2h2V9H7V4h2V2zm4 2v2h2V4h-2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="pixel-font text-[10px] sm:text-xs tracking-tight leading-none">
+                            DINO BADMINTON
+                        </h1>
+                        <span id="hdr-score" class="pixel-font text-[10px] sm:text-xs px-1.5 py-0.5 rounded" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">00 - 00</span>
+                    </div>
+                    <p class="text-[9px] sm:text-[10px] font-semibold hidden sm:block" style="color: var(--fg-muted);">
+                        WORLD TOUR ARENAS &bull; PRO JUMP-SMASH AI &bull; MOBILE READY
+                    </p>
+                </div>
+            </div>
+
+            <!-- Single-Level Interactive Controls Bar -->
+            <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 justify-end">
+                
+                <!-- Arena Environment Selector (Locked During Active Match) -->
+                <div id="arena-selector-group" class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+                    <span id="arena-hdr-label" class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">ARENA:</span>
+                    <button id="env-stadium" onclick="setArena('stadium'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Dino Open Indoor Badminton Arena">STADIUM</button>
+                    <button id="env-dome" onclick="setArena('dome'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Tokyo Championship Cyber Dome with Live Jumbotron">DOME</button>
+                    <button id="env-desert" onclick="setArena('desert'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Classic Chrome Dino Open Desert">DESERT</button>
+                </div>
+
+                <!-- Focus Slow-Mo Toggle -->
+                <button id="btn-slowmo" onclick="toggleSlowMo(); this.blur();" class="retro-btn selected text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Occasional Cinematic Bullet-Time Slow-Mo on Fast AI Smashes & Sweet-Spot Setups">
+                    <span id="slowmo-icon">SLOW-MO:ON</span>
+                </button>
+
+                <!-- AI Difficulty Selector (Clean, Distinct EASY / MED / HARD Tiers) -->
+                <div class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+                    <span class="text-[9px] font-bold px-1 hidden lg:inline" style="color: var(--fg-muted);">DIFFICULTY:</span>
+                    <button id="diff-easy" onclick="setDifficulty('easy'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Easy AI: Slower footwork, frequent high pop-ups & forgiving mistakes">EASY</button>
+                    <button id="diff-medium" onclick="setDifficulty('medium'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Medium AI: Balanced rally partner that tires when stretched corner-to-corner">MED</button>
+                    <button id="diff-hard" onclick="setDifficulty('hard'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Hard AI: Fast court coverage, jump smashes & open-court targeting">HARD</button>
+                </div>
+
+                <!-- Match Target Score Selector -->
+                <div class="hidden md:flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+                    <span class="text-[9px] font-bold px-1" style="color: var(--fg-muted);">PTS:</span>
+                    <button id="pts-11" onclick="setTargetPoints(11); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold">11</button>
+                    <button id="pts-21" onclick="setTargetPoints(21); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold">21</button>
+                </div>
+
+                <!-- Auto-Move Assist Toggle (Great for Mobile) -->
+                <button id="btn-assist" onclick="toggleAssist(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Auto-Run helper toward the shuttle landing reticle">
+                    <span id="assist-icon">AUTO-RUN:OFF</span>
+                </button>
+
+                <!-- Sound Toggle -->
+                <button id="btn-sound" onclick="toggleSound(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Retro Synth Audio">
+                    <span id="sound-icon">SFX:ON</span>
+                </button>
+
+                <!-- Dark Mode Toggle -->
+                <button id="btn-theme" onclick="toggleTheme(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Night Mode">
+                    <span id="theme-icon">NIGHT</span>
+                </button>
+
+                <!-- Pause Match Button -->
+                <button id="btn-pause" onclick="togglePause(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Pause or Resume Game (P / ESC)">
+                    <span id="pause-label">PAUSE (P)</span>
+                </button>
+
+                <!-- Reset Match Button -->
+                <button onclick="resetMatch(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold">
+                    RESET
+                </button>
+            </div>
+        </div>
+
+        <!-- INLINE CUSTOMIZABLE SMASH & KEYBIND STRIP (SINGLE-LEVEL) -->
+        <div class="flex flex-wrap items-center justify-between gap-1.5 py-1 px-1.5 mt-1 rounded text-[9px] sm:text-[10px]" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+            <!-- Smash Trigger Mode Selector -->
+            <div class="flex flex-wrap items-center gap-1">
+                <span class="font-bold uppercase" style="color: var(--fg-muted);">SMASH MODE:</span>
+                <button id="smode-auto" onclick="setSmashMode('auto'); this.blur();" class="retro-btn selected px-1.5 py-0.5 rounded font-bold" title="1-Tap Auto-Jump + Power Smash when in range">1-TAP AUTO-JUMP</button>
+                <button id="smode-dedicated" onclick="setSmashMode('dedicated'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Smash button always forces a fast downward attack">INSTANT SMASH</button>
+                <button id="smode-air" onclick="setSmashMode('air'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Classic: Jump first, then press Smash in mid-air">JUMP+SWING</button>
+            </div>
+
+            <!-- Inline Click-to-Rebind Keys -->
+            <div class="flex flex-wrap items-center gap-1">
+                <span class="font-bold uppercase hidden lg:inline" style="color: var(--fg-muted);">CLICK TO REBIND:</span>
+                <button id="bind-smash" onclick="startRebind('smash'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Smash">
+                    ⚡SMASH: <span id="lbl-bind-smash" class="underline">SPACE</span>
+                </button>
+                <button id="bind-short" onclick="startRebind('short'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Near-Net Drop">
+                    DROP: <span id="lbl-bind-short" class="underline">S</span>
+                </button>
+                <button id="bind-far" onclick="startRebind('far'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Far Clear">
+                    CLEAR: <span id="lbl-bind-far" class="underline">F</span>
+                </button>
+                <button id="bind-jump" onclick="startRebind('jump'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Jump">
+                    JUMP: <span id="lbl-bind-jump" class="underline">UP</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN COURT CANVAS AREA -->
+    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center min-h-0 my-1">
+        
+        <!-- Live Telemetry Strip -->
+        <div class="flex flex-wrap items-center justify-between text-[10px] sm:text-xs font-bold mb-1 px-1 gap-2">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span id="status-text" class="uppercase tracking-wider">SERVE READY</span>
+                <span class="opacity-40">|</span>
+                <span>RALLY:<span id="rally-count" class="ml-0.5">0</span></span>
+                <span class="hidden sm:inline opacity-40">|</span>
+                <span class="hidden sm:inline">BEST:<span id="best-rally" class="ml-0.5">0</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden md:inline" style="color: var(--fg-muted);">ROBO-REX: <strong id="ai-mood-text" style="color: var(--fg-color);">MED (100%)</strong></span>
+                <span id="shot-indicator" class="px-1.5 py-0.5 rounded text-[9px] sm:text-[10px]" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+                    SHOT: --
+                </span>
+            </div>
+        </div>
+
+        <!-- Responsive Pixel-Art Court Container -->
+        <div class="canvas-frame w-full flex-1 min-h-0 rounded overflow-hidden flex items-center justify-center">
+            <canvas id="gameCanvas" width="960" height="460"></canvas>
+        </div>
+    </main>
+
+    <!-- SINGLE-LEVEL BOTTOM MOBILE & DESKTOP GAMEPAD DOCK -->
+    <footer class="w-full max-w-6xl mx-auto shrink-0 pt-0.5">
+        <div class="grid grid-cols-2 sm:grid-cols-12 gap-1.5 items-center">
+            
+            <!-- Left Thumb Pad: Movement & Jump -->
+            <div class="col-span-1 sm:col-span-5 grid grid-cols-3 gap-1.5">
+                <button id="pad-left" class="retro-btn py-2.5 sm:py-2 rounded font-extrabold text-xs sm:text-sm flex flex-col items-center justify-center leading-tight">
+                    <span>&larr; LEFT</span>
+                    <span class="text-[8px] opacity-70 font-normal hidden sm:inline">MOVE BACK</span>
+                </button>
+                <button id="pad-jump" class="retro-btn py-2.5 sm:py-2 rounded font-extrabold text-xs sm:text-sm flex flex-col items-center justify-center leading-tight">
+                    <span>&uarr; JUMP</span>
+                    <span class="text-[8px] opacity-70 font-normal hidden sm:inline" id="pad-lbl-jump">[UP / W]</span>
+                </button>
+                <button id="pad-right" class="retro-btn py-2.5 sm:py-2 rounded font-extrabold text-xs sm:text-sm flex flex-col items-center justify-center leading-tight">
+                    <span>RIGHT &rarr;</span>
+                    <span class="text-[8px] opacity-70 font-normal hidden sm:inline">NEAR NET</span>
+                </button>
+            </div>
+
+            <!-- Center Hint (Desktop Only) -->
+            <div class="hidden sm:flex sm:col-span-2 flex-col items-center justify-center text-center px-1">
+                <span class="text-[9px] font-bold uppercase tracking-tight" style="color: var(--fg-muted);">TARGET RETICLE</span>
+                <span class="text-[8px]" style="color: var(--fg-muted);">Shows shuttle landing spot</span>
+            </div>
+
+            <!-- Right Thumb Pad: Shot Placement & Customizable Smash -->
+            <div class="col-span-1 sm:col-span-5 grid grid-cols-3 gap-1.5">
+                <button id="pad-short" class="retro-btn py-2.5 sm:py-2 rounded font-extrabold text-xs sm:text-sm flex flex-col items-center justify-center leading-tight" title="Drop shot right over the net">
+                    <span>DROP</span>
+                    <span class="text-[8px] opacity-75 font-normal" id="pad-lbl-short">NEAR [S]</span>
+                </button>
+                <button id="pad-smash" class="retro-btn py-2.5 sm:py-2 rounded font-extrabold text-xs sm:text-sm flex flex-col items-center justify-center leading-tight" style="background-color: var(--surface-color);" title="Power Smash or Fast Mid Drive">
+                    <span>⚡SMASH</span>
+                    <span class="text-[8px] opacity-75 font-normal" id="pad-lbl-smash">[SPACE]</span>
+                </button>
+                <button id="pad-far" class="retro-btn py-2.5 sm:py-2 rounded font-extrabold text-xs sm:text-sm flex flex-col items-center justify-center leading-tight" title="High deep clear to back baseline">
+                    <span>CLEAR</span>
+                    <span class="text-[8px] opacity-75 font-normal" id="pad-lbl-far">FAR [F]</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * ============================================================================
+         * DINO BADMINTON: WORLD TOUR EDITION (CHROME DINO PIXEL-ART ENGINE)
+         * - Forgiving & Floaty Shuttlecock Physics + Target Reticle + Strike Ring
+         * - Pause Modal (P / ESC), Customizable Smash Modes & Live Key Remapping
+         * - Distinct, Responsive AI Tiers (EASY, MED, HARD, PRO) + Explicit ADAPT Toggle
+         * - Selectable Monochrome Pixel Environments (STADIUM, DOME, DESERT)
+         * ============================================================================
+         */
+
+        // Web Audio Synthesizer for 8-Bit Sound Effects
+        class RetroSoundEngine {
+            constructor() {
+                this.enabled = true;
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(freq, type, duration, endFreq = null, gainVal = 0.11) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    if (endFreq !== null) {
+                        osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), this.ctx.currentTime + duration);
+                    }
+
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {
+                    // Ignore audio restriction errors
+                }
+            }
+
+            jump() { this.playTone(170, 'square', 0.11, 440, 0.08); }
+            hitClear() { this.playTone(300, 'triangle', 0.09, 640, 0.13); }
+            hitSmash() { this.playTone(580, 'sawtooth', 0.15, 110, 0.16); }
+            hitDrop() { this.playTone(420, 'sine', 0.07, 250, 0.10); }
+            netTouch() { this.playTone(140, 'sawtooth', 0.12, 75, 0.11); }
+            pauseBeep() { this.playTone(520, 'square', 0.08, 390, 0.08); }
+            focusSlowMo() { this.playTone(460, 'sine', 0.18, 190, 0.09); }
+
+            pointPlayer() {
+                this.playTone(523.25, 'square', 0.08, null, 0.09);
+                setTimeout(() => this.playTone(659.25, 'square', 0.08, null, 0.09), 80);
+                setTimeout(() => this.playTone(783.99, 'square', 0.16, null, 0.09), 160);
+            }
+
+            pointAI() {
+                this.playTone(310, 'square', 0.10, null, 0.09);
+                setTimeout(() => this.playTone(230, 'square', 0.18, null, 0.09), 110);
+            }
+        }
+
+        const sfx = new RetroSoundEngine();
+
+        // Canvas & Court Dimensions
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const W = 960;
+        const H = 460;
+        const GROUND_Y = 392;
+        const NET_X = W / 2;
+        const NET_HEIGHT = 100;
+        const NET_TOP_Y = GROUND_Y - NET_HEIGHT;
+        const COURT_LEFT = 55;
+        const COURT_RIGHT = W - 55;
+        const SERVICE_LINE_OFFSET = 100;
+
+        // DOM References
+        const statusTextEl = document.getElementById('status-text');
+        const rallyCountEl = document.getElementById('rally-count');
+        const bestRallyEl = document.getElementById('best-rally');
+        const shotIndicatorEl = document.getElementById('shot-indicator');
+        const hdrScoreEl = document.getElementById('hdr-score');
+        const aiMoodTextEl = document.getElementById('ai-mood-text');
+        const pauseLabelEl = document.getElementById('pause-label');
+
+        // Customizable Keybindings (Saved in localStorage)
+        const DEFAULT_BINDS = {
+            smash: 'Space',
+            short: 'KeyS',
+            far: 'KeyF',
+            jump: 'ArrowUp'
+        };
+
+        let keyBindings = { ...DEFAULT_BINDS };
+        try {
+            const savedBinds = localStorage.getItem('dino_badminton_binds');
+            if (savedBinds) {
+                keyBindings = { ...DEFAULT_BINDS, ...JSON.parse(savedBinds) };
+            }
+        } catch (e) {}
+
+        let rebindingAction = null;
+
+        function formatKeyName(code) {
+            if (!code) return '--';
+            if (code === 'Space') return 'SPACE';
+            if (code.startsWith('Key')) return code.slice(3).toUpperCase();
+            if (code.startsWith('Digit')) return code.slice(5);
+            if (code.startsWith('Arrow')) return code.slice(5).toUpperCase();
+            return code.toUpperCase().slice(0, 6);
+        }
+
+        function updateKeybindLabels() {
+            ['smash', 'short', 'far', 'jump'].forEach(action => {
+                const name = formatKeyName(keyBindings[action]);
+                const topLbl = document.getElementById(`lbl-bind-${action}`);
+                const btnEl = document.getElementById(`bind-${action}`);
+                if (topLbl) topLbl.textContent = rebindingAction === action ? 'PRESS KEY...' : name;
+                if (btnEl) btnEl.classList.toggle('rebinding', rebindingAction === action);
+            });
+            const padShort = document.getElementById('pad-lbl-short');
+            const padSmash = document.getElementById('pad-lbl-smash');
+            const padFar = document.getElementById('pad-lbl-far');
+            const padJump = document.getElementById('pad-lbl-jump');
+            if (padShort) padShort.textContent = `NEAR [${formatKeyName(keyBindings.short)}]`;
+            if (padSmash) padSmash.textContent = `[${formatKeyName(keyBindings.smash)}]`;
+            if (padFar) padFar.textContent = `FAR [${formatKeyName(keyBindings.far)}]`;
+            if (padJump) padJump.textContent = `[${formatKeyName(keyBindings.jump)}]`;
+        }
+
+        function startRebind(action) {
+            if (rebindingAction === action) {
+                rebindingAction = null;
+            } else {
+                rebindingAction = action;
+            }
+            updateKeybindLabels();
+            sfx.hitDrop();
+        }
+
+        // Game Configuration & State
+        let config = {
+            arena: 'stadium',      // 'stadium' (default), 'dome', 'desert'
+            slowMoEnabled: true,   // Occasional Focus Bullet-Time Slow-Mo on fast incoming AI attacks or high sweet-spot setups
+            difficulty: 'medium',  // 'easy', 'medium', 'hard'
+            smashMode: 'auto',     // 'auto' (1-tap jump+smash), 'dedicated' (always aggressive), 'air' (classic)
+            targetPoints: 11,
+            autoAssist: false,
+            darkMode: false
+        };
+
+        // Load persisted Arena preference
+        try {
+            const savedArena = localStorage.getItem('dino_badminton_arena');
+            if (savedArena && ['stadium', 'dome', 'desert'].includes(savedArena)) {
+                config.arena = savedArena;
+            }
+        } catch (e) {}
+
+        // Single crisp, energetic badminton physics standard
+        const GAME_PHYSICS = {
+            shuttleTimeScale: 1.06,
+            playerSpeed: 8.5,
+            hitRadius: 128
+        };
+
+        /**
+         * Clean, Distinct & Predictable AI Difficulty Tiers:
+         * - EASY: Slower movement, slower reaction, frequent weak pop-ups for easy smashes, and noticeable whiff chance when stretched.
+         * - MEDIUM: Balanced rally partner, solid returns, tires realistically when stretched corner-to-corner.
+         * - HARD: Fast competitive Robo-Rex, quick reactions, minimal errors, open-court targeting, and airborne jump smashes.
+         */
+        const AI_PROFILES = {
+            easy: {
+                label: 'EASY',
+                speed: 4.1,
+                reactionDelay: 15,
+                errorMargin: 44,
+                whiffChance: 0.22,
+                smashDefenseWhiff: 0.35,
+                weakPopupChance: 0.48,
+                unforcedErrorChance: 0.12,
+                fatigueRate: 0.14,
+                jumpSmashChance: 0.0,
+                smartTargeting: 0.15,
+                reach: 62
+            },
+            medium: {
+                label: 'MED',
+                speed: 5.8,
+                reactionDelay: 7,
+                errorMargin: 20,
+                whiffChance: 0.06,
+                smashDefenseWhiff: 0.16,
+                weakPopupChance: 0.22,
+                unforcedErrorChance: 0.04,
+                fatigueRate: 0.08,
+                jumpSmashChance: 0.28,
+                smartTargeting: 0.55,
+                reach: 70
+            },
+            hard: {
+                label: 'HARD',
+                speed: 7.8,
+                reactionDelay: 2,
+                errorMargin: 5,
+                whiffChance: 0.0,
+                smashDefenseWhiff: 0.03,
+                weakPopupChance: 0.05,
+                unforcedErrorChance: 0.008,
+                fatigueRate: 0.025,
+                jumpSmashChance: 0.80,
+                smartTargeting: 0.90,
+                reach: 82
+            }
+        };
+
+        let match = {
+            paused: false,
+            playerScore: 0,
+            aiScore: 0,
+            consecutiveAILead: 0,
+            server: 'player',
+            phase: 'serve', // 'serve', 'rally', 'point_pause', 'gameover'
+            pauseTimer: 0,
+            aiServeTimer: 0,
+            winner: null,
+            pointReason: 'PRESS [SPACE], [S] DROP, OR [F] CLEAR TO SERVE',
+            subMessage: 'INDOOR INTERNATIONAL STADIUM // READY',
+            rally: 0,
+            bestRally: 0,
+            lastShotName: '--',
+            lastShotKmh: 0,
+            screenShake: 0,
+            toastText: '',
+            toastTimer: 0,
+            landingX: null,
+            landingSide: null,
+            // Occasional Focus Bullet-Time Slow-Mo state
+            slowMoTimer: 0,
+            slowMoMaxTimer: 28,
+            slowMoReason: '⚡ FOCUS SLOW-MO!',
+            slowMoTriggeredThisShot: false,
+            slowMoEligibleShot: false
+        };
+
+        // Check if Arena Selection is Locked (locked once a rally starts or any score > 0 until Reset or Game Over)
+        function isArenaLocked() {
+            if (match.phase === 'gameover') return false;
+            return (match.playerScore > 0 || match.aiScore > 0 || match.phase !== 'serve');
+        }
+
+        function updateArenaLockUI() {
+            const locked = isArenaLocked();
+            const hdrLabel = document.getElementById('arena-hdr-label');
+            if (hdrLabel) {
+                hdrLabel.textContent = locked ? 'ARENA [LOCKED]:' : 'ARENA:';
+            }
+            ['stadium', 'dome', 'desert'].forEach(a => {
+                const btn = document.getElementById(`env-${a}`);
+                if (btn) {
+                    btn.classList.toggle('locked-arena', locked && config.arena !== a);
+                    if (locked) {
+                        btn.title = 'Locked during active match — Click RESET to switch Arena';
+                    } else {
+                        btn.title = `Switch to ${a.toUpperCase()} Arena`;
+                    }
+                }
+            });
+        }
+
+        // Entities
+        function createFighter(isAI) {
+            return {
+                isAI: isAI,
+                x: isAI ? W - 240 : 240,
+                y: GROUND_Y,
+                vx: 0,
+                vy: 0,
+                speed: isAI ? 5.8 : GAME_PHYSICS.playerSpeed,
+                jumpForce: -13.6,
+                grounded: true,
+                facing: isAI ? -1 : 1,
+                swingTimer: 0,
+                swingDuration: 20,
+                activeSwingTimer: 0,
+                queuedShotCategory: 'smash',
+                autoSmashPending: false,
+                swingCooldown: 0,
+                swingType: 'clear',
+                animRunFrame: 0,
+                blinkTimer: Math.random() * 150,
+                // Humanized / Competitive AI properties
+                stamina: 1.0,
+                aiReactionCounter: 0,
+                aiTargetX: W - 240,
+                aiWillWhiff: false,
+                aiBiteFakeTimer: 0,
+                aiMoodLabel: 'MED'
+            };
+        }
+
+        let player = createFighter(false);
+        let ai = createFighter(true);
+
+        let shuttle = {
+            x: 265,
+            y: GROUND_Y - 52,
+            vx: 0,
+            vy: 0,
+            rotation: 0,
+            lastHitBy: null,
+            lastPlayerShotCat: null,
+            isPlayerSmash: false,
+            isAISmash: false,
+            isWeakPopup: false,
+            hitCooldown: 0,
+            trail: []
+        };
+
+        // Environment Prop Collections
+        let clouds = [
+            { x: 140, y: 85, speed: 0.30, scale: 0.95 },
+            { x: 460, y: 60, speed: 0.20, scale: 0.8 },
+            { x: 790, y: 110, speed: 0.36, scale: 1.1 }
+        ];
+
+        let desertCacti = [
+            { x: 115, h: 36, type: 1 },
+            { x: 380, h: 28, type: 0 },
+            { x: 640, h: 34, type: 1 },
+            { x: 865, h: 30, type: 0 }
+        ];
+
+        let ptero = { x: 980, y: 125, speed: 1.35, wingFrame: 0 };
+
+        let groundPebbles = [];
+        for (let i = 0; i < 48; i++) {
+            groundPebbles.push({
+                x: Math.random() * W,
+                y: GROUND_Y + 6 + Math.random() * 48,
+                w: Math.random() > 0.7 ? 6 : 3,
+                h: 2
+            });
+        }
+
+        let particles = [];
+        let floatingPopups = [];
+
+        function showStatusToast(msg) {
+            match.toastText = msg;
+            match.toastTimer = 95;
+        }
+
+        /**
+         * Pure & Predictable AI Stats Calculator:
+         * - Directly uses the selected EASY, MED, or HARD profile without hidden rubber-banding overrides.
+         * - Factors in rally stamina fatigue so stretching the opponent corner-to-corner is rewarded.
+         */
+        function getEffectiveAIStats() {
+            const base = AI_PROFILES[config.difficulty] || AI_PROFILES.medium;
+            const fatigue = 1.0 - ai.stamina;
+
+            const isHard = config.difficulty === 'hard';
+            const fatigueSpeedPenalty = isHard ? 0.12 : 0.28;
+            const fatigueWhiffAdd = isHard ? 0.02 : 0.16;
+            const fatiguePopupAdd = isHard ? 0.05 : 0.22;
+
+            return {
+                speed: Math.max(3.2, base.speed * (1.0 - fatigue * fatigueSpeedPenalty)),
+                reactionDelay: Math.max(1, Math.round(base.reactionDelay + fatigue * 4)),
+                errorMargin: Math.max(2, base.errorMargin + fatigue * 14),
+                whiffChance: Math.min(0.50, base.whiffChance + fatigue * fatigueWhiffAdd),
+                smashDefenseWhiff: base.smashDefenseWhiff,
+                weakPopupChance: Math.min(0.65, base.weakPopupChance + fatigue * fatiguePopupAdd),
+                unforcedErrorChance: base.unforcedErrorChance,
+                fatigueRate: base.fatigueRate,
+                jumpSmashChance: base.jumpSmashChance,
+                smartTargeting: base.smartTargeting,
+                reach: base.reach
+            };
+        }
+
+        function updateAIMoodUI() {
+            const pct = Math.round(ai.stamina * 100);
+            const base = AI_PROFILES[config.difficulty] || AI_PROFILES.medium;
+            let mood = base.label;
+            if (ai.aiWillWhiff && match.phase === 'rally' && shuttle.vx > 0) {
+                mood = 'OFF-GUARD!';
+            } else if (pct < 40) {
+                mood = 'WINDED';
+            }
+            ai.aiMoodLabel = mood;
+            if (aiMoodTextEl) {
+                aiMoodTextEl.textContent = `${mood} (${pct}%)`;
+            }
+        }
+
+        /**
+         * Immediately Recalculate AI Mid-Rally State when Difficulty Changes
+         */
+        function recalculateAIMidRally() {
+            const stats = getEffectiveAIStats();
+            ai.speed = stats.speed;
+            ai.aiReactionCounter = 0;
+
+            if (config.difficulty === 'hard') {
+                ai.stamina = Math.max(ai.stamina, 0.90);
+                ai.aiBiteFakeTimer = 0;
+                ai.aiWillWhiff = false;
+            }
+
+            if (match.phase === 'rally') {
+                predictShuttleLanding();
+                if (shuttle.vx > 0 && match.landingSide === 'ai' && match.landingX !== null) {
+                    const noise = (Math.random() - 0.5) * stats.errorMargin;
+                    ai.aiTargetX = Math.max(NET_X + 38, Math.min(COURT_RIGHT + 12, match.landingX + noise));
+                } else {
+                    ai.aiTargetX = NET_X + 215;
+                }
+            }
+            updateAIMoodUI();
+        }
+
+        // Input State
+        const keys = {
+            left: false,
+            right: false,
+            up: false,
+            down: false
+        };
+
+        window.addEventListener('keydown', (e) => {
+            // Handle Live Key Rebinding
+            if (rebindingAction) {
+                e.preventDefault();
+                if (e.code !== 'Escape') {
+                    keyBindings[rebindingAction] = e.code;
+                    try {
+                        localStorage.setItem('dino_badminton_binds', JSON.stringify(keyBindings));
+                    } catch (err) {}
+                }
+                rebindingAction = null;
+                updateKeybindLabels();
+                sfx.pointPlayer();
+                return;
+            }
+
+            // Pause Shortcut
+            if (e.code === 'KeyP' || e.code === 'Escape') {
+                e.preventDefault();
+                togglePause();
+                return;
+            }
+
+            if (match.paused) return;
+
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(e.code)) {
+                e.preventDefault();
+            }
+
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+
+            if (e.code === keyBindings.jump || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                keys.up = true;
+                triggerJump(player);
+            }
+
+            if (e.code === keyBindings.short || e.code === 'ArrowDown' || e.code === 'KeyZ') {
+                keys.down = true;
+                if (!e.repeat) handlePlayerSwingInput('short');
+            } else if (e.code === keyBindings.far || e.code === 'KeyX') {
+                if (!e.repeat) handlePlayerSwingInput('far');
+            } else if (e.code === keyBindings.smash || e.code === 'Enter') {
+                if (!e.repeat) {
+                    if (keys.left || keys.down) {
+                        handlePlayerSwingInput('short');
+                    } else if (keys.right) {
+                        handlePlayerSwingInput('far');
+                    } else {
+                        handlePlayerSwingInput('smash');
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            if (e.code === keyBindings.jump || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
+            if (e.code === keyBindings.short || e.code === 'ArrowDown' || e.code === 'KeyZ') keys.down = false;
+        });
+
+        // Multi-Touch Mobile Gamepad Bindings
+        function bindPadHold(id, keyProp) {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            const start = (e) => {
+                e.preventDefault();
+                if (match.paused) return;
+                keys[keyProp] = true;
+                btn.classList.add('active-press');
+            };
+            const end = (e) => {
+                e.preventDefault();
+                keys[keyProp] = false;
+                btn.classList.remove('active-press');
+            };
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+            btn.addEventListener('mouseleave', end);
+            btn.addEventListener('touchstart', start, { passive: false });
+            btn.addEventListener('touchend', end, { passive: false });
+            btn.addEventListener('touchcancel', end, { passive: false });
+        }
+
+        function bindPadTap(id, callback) {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            const trigger = (e) => {
+                e.preventDefault();
+                if (match.paused) return;
+                btn.classList.add('active-press');
+                callback();
+                setTimeout(() => btn.classList.remove('active-press'), 110);
+            };
+            btn.addEventListener('mousedown', trigger);
+            btn.addEventListener('touchstart', trigger, { passive: false });
+        }
+
+        bindPadHold('pad-left', 'left');
+        bindPadHold('pad-right', 'right');
+        bindPadTap('pad-jump', () => triggerJump(player));
+        bindPadTap('pad-short', () => handlePlayerSwingInput('short'));
+        bindPadTap('pad-smash', () => handlePlayerSwingInput('smash'));
+        bindPadTap('pad-far', () => handlePlayerSwingInput('far'));
+
+        // Tap on Court Canvas to Resume if Paused, or Quick-Swing on Mobile
+        canvas.addEventListener('pointerdown', (e) => {
+            if (match.paused) {
+                togglePause();
+                return;
+            }
+            if (match.phase === 'gameover') {
+                resetMatch();
+            } else if (match.phase === 'serve' && match.server === 'player') {
+                handlePlayerSwingInput('smash');
+            }
+        });
+
+        // Crisp Ballistic Trajectory Solver (Snappy Badminton Flight)
+        const GRAVITY = 0.36;
+        const DRAG = 0.995;
+
+        function computeShotVelocity(startX, startY, targetX, desiredPeakY) {
+            const actualPeakY = Math.min(startY - 14, desiredPeakY);
+            const dyUp = Math.max(14, startY - actualPeakY);
+            const vy = -Math.sqrt(2 * GRAVITY * dyUp) * 1.03;
+            const tUp = Math.abs(vy) / GRAVITY;
+            const dyDown = Math.max(16, (GROUND_Y - 8) - actualPeakY);
+            const tDown = Math.sqrt((2 * dyDown) / GRAVITY);
+            const totalFrames = Math.max(20, tUp + tDown);
+            const dx = targetX - startX;
+            const dragCompensation = 1 / Math.pow(DRAG, totalFrames * 0.55);
+            const vx = (dx / totalFrames) * dragCompensation;
+            return { vx, vy };
+        }
+
+        function predictShuttleLanding() {
+            if (match.phase !== 'rally') {
+                match.landingX = null;
+                match.landingSide = null;
+                return;
+            }
+            let sx = shuttle.x;
+            let sy = shuttle.y;
+            let svx = shuttle.vx;
+            let svy = shuttle.vy;
+
+            for (let i = 0; i < 380; i++) {
+                svy += GRAVITY;
+                svx *= DRAG;
+                svy *= DRAG;
+                sx += svx;
+                sy += svy;
+
+                if (Math.abs(sx - NET_X) < 7 && sy >= NET_TOP_Y) {
+                    svx *= -0.35;
+                }
+                if (sy >= GROUND_Y - 6) {
+                    match.landingX = Math.max(COURT_LEFT - 25, Math.min(COURT_RIGHT + 25, sx));
+                    match.landingSide = sx < NET_X ? 'player' : 'ai';
+                    return;
+                }
+            }
+            match.landingX = sx;
+            match.landingSide = sx < NET_X ? 'player' : 'ai';
+        }
+
+        function triggerJump(fighter) {
+            if (match.paused) return;
+            if (match.phase === 'gameover') {
+                resetMatch();
+                return;
+            }
+            if (fighter.grounded) {
+                fighter.vy = fighter.jumpForce;
+                fighter.grounded = false;
+                sfx.jump();
+                spawnDust(fighter.x, GROUND_Y, 5);
+            }
+        }
+
+        function handlePlayerSwingInput(shotCategory) {
+            if (match.paused) return;
+            if (match.phase === 'gameover') {
+                resetMatch();
+                return;
+            }
+
+            // Support 1-Tap Auto-Jump Smash when Smash button is pressed and shuttle is overhead/incoming
+            if (shotCategory === 'smash' && config.smashMode === 'auto' && match.phase === 'rally') {
+                const dx = Math.abs(shuttle.x - player.x);
+                if (player.grounded && shuttle.x < NET_X + 20 && dx < 160 && shuttle.y < GROUND_Y - 75) {
+                    triggerJump(player);
+                    player.autoSmashPending = true;
+                }
+            }
+
+            triggerSwing(player, shotCategory);
+        }
+
+        function triggerSwing(fighter, shotCategory = 'smash') {
+            if (fighter.swingTimer > 0 && fighter.activeSwingTimer > 5) return;
+
+            fighter.swingTimer = fighter.swingDuration;
+            fighter.queuedShotCategory = shotCategory;
+
+            if (!fighter.isAI) {
+                fighter.activeSwingTimer = 17; // Forgiving ~280ms multi-frame strike window
+            }
+
+            // Handle Serve
+            if (match.phase === 'serve') {
+                if ((match.server === 'player' && !fighter.isAI) || (match.server === 'ai' && fighter.isAI)) {
+                    executeServe(fighter, shotCategory);
+                }
+                return;
+            }
+
+            if (match.phase === 'rally') {
+                checkAndExecuteStrike(fighter);
+            }
+        }
+
+        // Evaluate AI's reaction when Player hits a shot toward AI side
+        function evaluateAIReactionToPlayerShot(shotCategory, isSmash) {
+            const stats = getEffectiveAIStats();
+
+            // Drain AI stamina on every player shot; extra drain if player alternates Near vs Far
+            let drain = stats.fatigueRate;
+            if (shuttle.lastPlayerShotCat && shuttle.lastPlayerShotCat !== shotCategory) {
+                drain *= (config.difficulty === 'hard') ? 1.25 : 1.65;
+                ai.aiBiteFakeTimer = Math.round(stats.reactionDelay * 1.15);
+            } else {
+                ai.aiBiteFakeTimer = stats.reactionDelay;
+            }
+            shuttle.lastPlayerShotCat = shotCategory;
+            shuttle.isPlayerSmash = isSmash;
+
+            ai.stamina = Math.max(0.15, ai.stamina - drain);
+
+            // Roll whether AI will misjudge or whiff this shot based strictly on current tier
+            let whiffProb = stats.whiffChance;
+            if (isSmash) {
+                whiffProb += stats.smashDefenseWhiff;
+            }
+            const targetLanding = match.landingX !== null ? match.landingX : (NET_X + 210);
+            const stretchDist = Math.abs(targetLanding - ai.x);
+
+            if (config.difficulty === 'easy') {
+                if (stretchDist > 165) whiffProb += 0.20;
+            } else if (config.difficulty === 'medium') {
+                if (stretchDist > 210) whiffProb += 0.14;
+            } else if (config.difficulty === 'hard') {
+                if (isSmash && stretchDist > 240) whiffProb += 0.06;
+            }
+
+            ai.aiWillWhiff = Math.random() < whiffProb;
+
+            // Update AI target X with tier-appropriate precision
+            if (ai.aiWillWhiff) {
+                // Stop short or misjudge direction rather than running on top of the shuttle
+                const shortFactor = config.difficulty === 'easy' ? 0.45 : 0.60;
+                ai.aiTargetX = ai.x + (targetLanding - ai.x) * shortFactor;
+                ai.aiTargetX = Math.max(NET_X + 45, Math.min(COURT_RIGHT + 10, ai.aiTargetX));
+            } else {
+                const noise = (Math.random() - 0.5) * stats.errorMargin;
+                ai.aiTargetX = Math.max(NET_X + 36, Math.min(COURT_RIGHT + 12, targetLanding + noise));
+            }
+
+            updateAIMoodUI();
+        }
+
+        function executeServe(fighter, shotCategory) {
+            match.phase = 'rally';
+            match.rally = 1;
+            match.slowMoTimer = 0;
+            match.slowMoTriggeredThisShot = false;
+            match.slowMoEligibleShot = false;
+            updateRallyUI();
+            updateArenaLockUI();
+
+            const dir = fighter.isAI ? -1 : 1;
+            shuttle.x = fighter.x + dir * 26;
+            shuttle.y = fighter.y - 48;
+            shuttle.isAISmash = false;
+            shuttle.isWeakPopup = false;
+
+            let targetX, peakY, serveLabel;
+
+            if (!fighter.isAI) {
+                if (shotCategory === 'short') {
+                    targetX = NET_X + SERVICE_LINE_OFFSET + 25;
+                    peakY = NET_TOP_Y - 36;
+                    serveLabel = 'SHORT SERVE';
+                    sfx.hitDrop();
+                } else if (shotCategory === 'far') {
+                    targetX = COURT_RIGHT - 45;
+                    peakY = 92;
+                    serveLabel = 'DEEP HIGH SERVE';
+                    sfx.hitClear();
+                } else {
+                    targetX = NET_X + 225;
+                    peakY = 135;
+                    serveLabel = 'MID SERVE';
+                    sfx.hitClear();
+                }
+                match.lastShotKmh = 135;
+            } else {
+                const highServe = Math.random() > 0.42;
+                targetX = highServe ? (COURT_LEFT + 95 + Math.random() * 75) : (NET_X - SERVICE_LINE_OFFSET - 30);
+                peakY = highServe ? 105 : (NET_TOP_Y - 40);
+                serveLabel = highServe ? 'AI HIGH SERVE' : 'AI LOW SERVE';
+                match.lastShotKmh = 140;
+                sfx.hitClear();
+            }
+
+            const vel = computeShotVelocity(shuttle.x, shuttle.y, targetX, peakY);
+            shuttle.vx = vel.vx;
+            shuttle.vy = vel.vy;
+            shuttle.lastHitBy = fighter.isAI ? 'ai' : 'player';
+            shuttle.hitCooldown = 16;
+            fighter.activeSwingTimer = 0;
+
+            setShotName(serveLabel);
+            statusTextEl.textContent = 'RALLY IN PROGRESS';
+            predictShuttleLanding();
+
+            if (!fighter.isAI) {
+                evaluateAIReactionToPlayerShot(shotCategory, false);
+            }
+
+            spawnSparks(shuttle.x, shuttle.y, 10, false);
+            spawnFloatingText(shotCategory === 'short' ? 'SHORT SERVE' : (shotCategory === 'far' ? 'FAR SERVE' : 'SERVE!'), shuttle.x, shuttle.y - 18);
+        }
+
+        function checkAndExecuteStrike(fighter) {
+            if (shuttle.hitCooldown > 0) return;
+            if (!fighter.isAI && shuttle.lastHitBy === 'player') return;
+            if (fighter.isAI && shuttle.lastHitBy === 'ai') return;
+
+            const dir = fighter.isAI ? -1 : 1;
+            const strikeX = fighter.x + dir * 18;
+            const strikeY = fighter.y - 46;
+
+            const dx = shuttle.x - strikeX;
+            const dy = shuttle.y - strikeY;
+            const dist = Math.hypot(dx, dy);
+
+            const stats = fighter.isAI ? getEffectiveAIStats() : null;
+            const hitRadius = fighter.isAI ? stats.reach : GAME_PHYSICS.hitRadius;
+
+            if (dist <= hitRadius) {
+                const validSide = fighter.isAI ? (shuttle.x > NET_X - 18) : (shuttle.x < NET_X + 26);
+                if (validSide) {
+                    const shotCategory = fighter.queuedShotCategory || 'smash';
+                    const airborne = !fighter.grounded && (GROUND_Y - fighter.y > 14);
+
+                    let targetX, peakY, shotLabel;
+                    let isSmash = false;
+                    let aiPopupFlag = false;
+
+                    // Immediately snap back to 1.0x crisp speed as soon as a player or AI connects!
+                    match.slowMoTimer = 0;
+
+                    if (!fighter.isAI) {
+                        if (shotCategory === 'short') {
+                            targetX = NET_X + 78 + Math.random() * 28;
+                            peakY = Math.min(shuttle.y - 20, NET_TOP_Y - 30);
+                            shotLabel = 'DROP SHOT (NEAR NET)';
+                            fighter.swingType = 'drop';
+                            match.lastShotKmh = 128 + Math.floor(Math.random() * 25);
+                            sfx.hitDrop();
+                        } else if (shotCategory === 'far') {
+                            targetX = COURT_RIGHT - 35 - Math.random() * 25;
+                            peakY = 92;
+                            shotLabel = 'FAR CLEAR (BACKCOURT)';
+                            fighter.swingType = 'clear';
+                            match.lastShotKmh = 185 + Math.floor(Math.random() * 30);
+                            sfx.hitClear();
+                        } else {
+                            // 'smash' button pressed -> Evaluate customizable Smash Mode!
+                            const canSmash =
+                                config.smashMode === 'dedicated' ||
+                                (config.smashMode === 'auto' && (airborne || fighter.autoSmashPending || shuttle.y < GROUND_Y - 85)) ||
+                                (config.smashMode === 'air' && airborne);
+
+                            if (canSmash) {
+                                const openSpot = ai.x > NET_X + 230 ? (NET_X + 125 + Math.random() * 40) : (NET_X + 235 + Math.random() * 65);
+                                targetX = openSpot;
+                                peakY = Math.min(shuttle.y - 4, NET_TOP_Y - 22);
+                                shotLabel = 'POWER SMASH!';
+                                fighter.swingType = 'smash';
+                                isSmash = true;
+                                match.lastShotKmh = 325 + Math.floor(Math.random() * 65);
+                                match.screenShake = 7;
+                                sfx.hitSmash();
+                            } else {
+                                targetX = NET_X + 210 + Math.random() * 45;
+                                peakY = Math.min(shuttle.y - 28, NET_TOP_Y - 46);
+                                shotLabel = 'FAST MID DRIVE';
+                                fighter.swingType = 'drive';
+                                match.lastShotKmh = 235 + Math.floor(Math.random() * 35);
+                                sfx.hitClear();
+                            }
+                        }
+                        fighter.autoSmashPending = false;
+                        shuttle.isAISmash = false;
+                        shuttle.isWeakPopup = false;
+                    } else {
+                        // AI Return Logic (Scales cleanly across Easy, Med, and Hard)
+                        const r = Math.random();
+                        const aiAirborne = !ai.grounded && (GROUND_Y - ai.y > 14);
+
+                        // 1. Rare unforced error when winded
+                        if (ai.stamina < 0.45 && Math.random() < stats.unforcedErrorChance) {
+                            targetX = COURT_LEFT - 26;
+                            peakY = 140;
+                            shotLabel = 'AI OVERHIT (LONG)';
+                            match.lastShotKmh = 195;
+                            sfx.hitClear();
+                        }
+                        // 2. AI Jump Smash / Aggressive Attack on MED & HARD
+                        else if ((aiAirborne || shuttle.y < GROUND_Y - 92) && Math.random() < stats.jumpSmashChance && !shuttle.isPlayerSmash) {
+                            const playerNearNet = player.x > NET_X - 190;
+                            targetX = playerNearNet ? (COURT_LEFT + 75 + Math.random() * 45) : (NET_X - 115 - Math.random() * 35);
+                            peakY = Math.min(shuttle.y - 5, NET_TOP_Y - 22);
+                            shotLabel = 'ROBO JUMP SMASH!';
+                            fighter.swingType = 'smash';
+                            isSmash = true;
+                            match.lastShotKmh = 310 + Math.floor(Math.random() * 60);
+                            match.screenShake = 6;
+                            sfx.hitSmash();
+                        }
+                        // 3. Weak Pop-Up (Frequent on Easy, occasional on Med, rare on Hard)
+                        else if (r < stats.weakPopupChance || (shuttle.isPlayerSmash && Math.random() < stats.weakPopupChance * 1.8)) {
+                            targetX = NET_X - 155 - Math.random() * 45;
+                            peakY = 88;
+                            shotLabel = 'WEAK POP-UP (SMASH IT!)';
+                            aiPopupFlag = true;
+                            match.lastShotKmh = 118;
+                            sfx.hitDrop();
+                            spawnFloatingText('SMASH CHANCE!', NET_X - 160, 145);
+                        }
+                        // 4. Tactical Placement
+                        else if (shotCategory === 'short') {
+                            targetX = NET_X - 88 - Math.random() * 32;
+                            peakY = Math.min(shuttle.y - 24, NET_TOP_Y - 34);
+                            shotLabel = 'AI TIGHT DROP';
+                            match.lastShotKmh = 135;
+                            sfx.hitDrop();
+                        } else if (shotCategory === 'far') {
+                            targetX = COURT_LEFT + 45 + Math.random() * 40;
+                            peakY = 98;
+                            shotLabel = 'AI DEEP CLEAR';
+                            match.lastShotKmh = 190;
+                            sfx.hitClear();
+                        } else {
+                            targetX = COURT_LEFT + 145 + Math.random() * 55;
+                            peakY = Math.min(shuttle.y - 30, NET_TOP_Y - 48);
+                            shotLabel = 'AI FAST DRIVE';
+                            match.lastShotKmh = 240;
+                            sfx.hitClear();
+                        }
+
+                        shuttle.isAISmash = isSmash;
+                        shuttle.isWeakPopup = aiPopupFlag;
+
+                        // Decide whether this AI return qualifies for an occasional Focus Bullet-Time Slow-Mo window!
+                        match.slowMoTriggeredThisShot = false;
+                        if (isSmash || aiPopupFlag) {
+                            match.slowMoEligibleShot = true;
+                        } else {
+                            match.slowMoEligibleShot = Math.random() < 0.30;
+                        }
+                    }
+
+                    const vel = computeShotVelocity(shuttle.x, shuttle.y, targetX, peakY);
+                    if (isSmash) {
+                        vel.vx *= fighter.isAI ? 1.13 : 1.16;
+                    }
+                    shuttle.vx = vel.vx;
+                    shuttle.vy = vel.vy;
+
+                    shuttle.lastHitBy = fighter.isAI ? 'ai' : 'player';
+                    shuttle.hitCooldown = 18;
+                    fighter.activeSwingTimer = 0;
+
+                    match.rally++;
+                    updateRallyUI();
+                    setShotName(shotLabel);
+                    predictShuttleLanding();
+
+                    if (!fighter.isAI) {
+                        evaluateAIReactionToPlayerShot(shotCategory, isSmash);
+                    } else {
+                        updateAIMoodUI();
+                    }
+
+                    spawnSparks(shuttle.x, shuttle.y, isSmash ? 20 : 11, isSmash);
+                    const popupLabel = isSmash ? '⚡SMASH!' : (shotCategory === 'short' ? 'NEAR NET!' : (shotCategory === 'far' ? 'FAR CLEAR!' : 'DRIVE!'));
+                    spawnFloatingText(popupLabel, shuttle.x, shuttle.y - 22);
+                }
+            }
+        }
+
+        // Particles & Floating Popups
+        function spawnSparks(x, y, count, explosive) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (explosive ? 2.5 : 1.2) + Math.random() * (explosive ? 5.2 : 2.8);
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: explosive ? 4 : 3,
+                    life: 14 + Math.random() * 10,
+                    maxLife: 24
+                });
+            }
+        }
+
+        function spawnDust(x, y, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 18,
+                    y: y - 2,
+                    vx: (Math.random() - 0.5) * 2.2,
+                    vy: -Math.random() * 1.6,
+                    size: 3,
+                    life: 12,
+                    maxLife: 12
+                });
+            }
+        }
+
+        function spawnFloatingText(text, x, y) {
+            floatingPopups.push({
+                text: text,
+                x: x,
+                y: y,
+                life: 36,
+                maxLife: 36
+            });
+        }
+
+        function updateRallyUI() {
+            rallyCountEl.textContent = match.rally;
+            if (match.rally > match.bestRally) {
+                match.bestRally = match.rally;
+                bestRallyEl.textContent = match.bestRally;
+            }
+        }
+
+        function updateScoreHeaderUI() {
+            const p = String(match.playerScore).padStart(2, '0');
+            const a = String(match.aiScore).padStart(2, '0');
+            if (hdrScoreEl) hdrScoreEl.textContent = `${p} - ${a}`;
+        }
+
+        function setShotName(name) {
+            match.lastShotName = name;
+            shotIndicatorEl.textContent = `SHOT: ${name}`;
+        }
+
+        function setupServe(serverSide) {
+            match.phase = 'serve';
+            match.server = serverSide;
+            match.rally = 0;
+            match.landingX = null;
+            match.landingSide = null;
+            match.slowMoTimer = 0;
+            match.slowMoTriggeredThisShot = false;
+            match.slowMoEligibleShot = false;
+            updateRallyUI();
+            updateArenaLockUI();
+            setShotName('--');
+
+            player.x = 240;
+            player.y = GROUND_Y;
+            player.vx = 0;
+            player.vy = 0;
+            player.grounded = true;
+            player.activeSwingTimer = 0;
+            player.autoSmashPending = false;
+
+            ai.x = W - 240;
+            ai.y = GROUND_Y;
+            ai.vx = 0;
+            ai.vy = 0;
+            ai.grounded = true;
+            ai.stamina = 1.0;
+            ai.aiWillWhiff = false;
+            ai.aiBiteFakeTimer = 0;
+            updateAIMoodUI();
+
+            shuttle.vx = 0;
+            shuttle.vy = 0;
+            shuttle.trail = [];
+            shuttle.lastPlayerShotCat = null;
+            shuttle.isPlayerSmash = false;
+            shuttle.isAISmash = false;
+            shuttle.isWeakPopup = false;
+
+            if (serverSide === 'player') {
+                shuttle.x = player.x + 28;
+                shuttle.y = player.y - 48;
+                shuttle.rotation = 0.4;
+                match.pointReason = `PRESS [${formatKeyName(keyBindings.smash)}], [${formatKeyName(keyBindings.short)}] DROP, OR [${formatKeyName(keyBindings.far)}] CLEAR`;
+                match.subMessage = 'YOUR SERVE // AIM NEAR OR FAR';
+                statusTextEl.textContent = 'YOUR SERVE';
+            } else {
+                shuttle.x = ai.x - 28;
+                shuttle.y = ai.y - 48;
+                shuttle.rotation = Math.PI - 0.4;
+                match.aiServeTimer = 46;
+                match.pointReason = 'ROBO-REX IS SERVING...';
+                match.subMessage = 'GET READY TO RETURN';
+                statusTextEl.textContent = 'OPPONENT SERVE';
+            }
+        }
+
+        function scorePoint(winnerSide, reasonText) {
+            match.phase = 'point_pause';
+            match.pauseTimer = 70;
+            match.server = winnerSide;
+            match.landingX = null;
+            match.slowMoTimer = 0;
+
+            if (winnerSide === 'player') {
+                match.playerScore++;
+                match.consecutiveAILead = 0;
+                match.pointReason = `POINT PLAYER // ${reasonText}`;
+                statusTextEl.textContent = 'POINT SCORED!';
+                sfx.pointPlayer();
+            } else {
+                match.aiScore++;
+                match.consecutiveAILead++;
+                match.pointReason = `POINT ROBO-REX // ${reasonText}`;
+                statusTextEl.textContent = 'OPPONENT SCORED';
+                sfx.pointAI();
+            }
+
+            updateScoreHeaderUI();
+
+            const target = config.targetPoints;
+            if ((match.playerScore >= target || match.aiScore >= target) && Math.abs(match.playerScore - match.aiScore) >= 2) {
+                match.phase = 'gameover';
+                match.winner = match.playerScore > match.aiScore ? 'PLAYER (1P DINO)' : 'ROBO-REX (AI)';
+                match.pointReason = `${match.winner} WINS THE MATCH!`;
+                match.subMessage = 'PRESS [SPACE] OR TAP COURT TO PLAY AGAIN';
+                statusTextEl.textContent = 'MATCH COMPLETE';
+            } else {
+                match.subMessage = 'NEXT SERVE STARTING...';
+            }
+            updateArenaLockUI();
+        }
+
+        // Update AI Opponent
+        function updateAI() {
+            const stats = getEffectiveAIStats();
+            ai.speed = stats.speed;
+
+            if (match.phase === 'serve') {
+                if (match.server === 'ai') {
+                    match.aiServeTimer--;
+                    if (match.aiServeTimer <= 0) {
+                        const serveChoice = (config.difficulty === 'hard') && Math.random() > 0.5 ? 'short' : 'smash';
+                        triggerSwing(ai, serveChoice);
+                    }
+                }
+                return;
+            }
+
+            if (match.phase !== 'rally') {
+                ai.vx = 0;
+                return;
+            }
+
+            // Reaction delay / wrong-foot hesitation countdown
+            if (ai.aiBiteFakeTimer > 0) {
+                ai.aiBiteFakeTimer--;
+                ai.vx *= 0.72;
+                return;
+            }
+
+            ai.aiReactionCounter++;
+            if (ai.aiReactionCounter >= stats.reactionDelay) {
+                ai.aiReactionCounter = 0;
+
+                if (shuttle.vx < 0 && shuttle.x < NET_X) {
+                    // Recover toward center base position
+                    const centerOffset = (config.difficulty === 'hard') ? 205 : (config.difficulty === 'easy' ? 245 : 220);
+                    ai.aiTargetX = NET_X + centerOffset;
+                } else if (shuttle.vx > 0 && match.landingSide === 'ai' && match.landingX !== null && !ai.aiWillWhiff) {
+                    if (config.difficulty === 'hard') {
+                        ai.aiTargetX = Math.max(NET_X + 36, Math.min(COURT_RIGHT + 12, match.landingX));
+                    }
+                }
+            }
+
+            // Horizontal Movement toward perceived target
+            const diffX = ai.aiTargetX - ai.x;
+            if (Math.abs(diffX) > 7) {
+                ai.vx = Math.sign(diffX) * ai.speed;
+            } else {
+                ai.vx = 0;
+            }
+
+            const dx = shuttle.x - (ai.x - 16);
+            const dy = shuttle.y - (ai.y - 48);
+            const dist = Math.hypot(dx, dy);
+
+            // AI Jump-Smash Initiation on MED & HARD when a high ball enters AI court
+            if (
+                !ai.aiWillWhiff &&
+                ai.grounded &&
+                shuttle.x > NET_X + 25 &&
+                shuttle.y < GROUND_Y - 105 &&
+                shuttle.y > GROUND_Y - 210 &&
+                Math.abs(shuttle.x - ai.x) < 75 &&
+                shuttle.vy > -2.5 &&
+                Math.random() < stats.jumpSmashChance * 0.25
+            ) {
+                ai.vy = ai.jumpForce * 0.95;
+                ai.grounded = false;
+                sfx.jump();
+            }
+
+            // If AI rolled a whiff, do a late decorative swing animation without striking the shuttle
+            if (ai.aiWillWhiff) {
+                if (shuttle.y > GROUND_Y - 20 && Math.abs(dx) < 110 && ai.swingCooldown <= 0) {
+                    ai.swingTimer = ai.swingDuration;
+                    ai.swingCooldown = 25;
+                    spawnFloatingText('MISSED!', ai.x, ai.y - 88);
+                }
+                return;
+            }
+
+            // Decide Swing & Tactical Shot Selection when in Range
+            if (shuttle.x > NET_X - 8 && dist <= stats.reach && shuttle.hitCooldown <= 0 && ai.swingCooldown <= 0) {
+                let aiShot = 'smash';
+                const smart = Math.random() < stats.smartTargeting;
+
+                if (smart) {
+                    // Target open court away from where Player is standing
+                    if (player.x > NET_X - 165) {
+                        aiShot = 'far'; // Lob over player crowding the net
+                    } else if (player.x < COURT_LEFT + 145) {
+                        aiShot = 'short'; // Drop near net when player is deep in backcourt
+                    } else {
+                        aiShot = (!ai.grounded || shuttle.y < GROUND_Y - 90) ? 'smash' : (Math.random() > 0.5 ? 'short' : 'far');
+                    }
+                } else {
+                    const r = Math.random();
+                    if (r < 0.35) aiShot = 'far';
+                    else if (r < 0.65) aiShot = 'short';
+                }
+
+                ai.swingCooldown = (config.difficulty === 'hard') ? 15 : 22;
+                triggerSwing(ai, aiShot);
+            }
+        }
+
+        // Main Physics Update Loop
+        function update() {
+            if (match.paused) return;
+
+            player.speed = GAME_PHYSICS.playerSpeed;
+
+            // Environment animations
+            clouds.forEach(c => {
+                c.x -= c.speed;
+                if (c.x < -120) c.x = W + 80;
+            });
+
+            if (config.arena === 'desert') {
+                ptero.x -= ptero.speed;
+                ptero.wingFrame += 0.12;
+                if (ptero.x < -80) {
+                    ptero.x = W + 180 + Math.random() * 200;
+                    ptero.y = 85 + Math.random() * 75;
+                }
+            }
+
+            if (match.toastTimer > 0) match.toastTimer--;
+            if (match.slowMoTimer > 0) match.slowMoTimer--;
+
+            if (match.screenShake > 0) match.screenShake *= 0.8;
+            if (match.screenShake < 0.4) match.screenShake = 0;
+
+            // Player Horizontal Input & Optional Auto-Run Assist
+            if (keys.left && !keys.right) {
+                player.vx = -player.speed;
+            } else if (keys.right && !keys.left) {
+                player.vx = player.speed;
+            } else if (config.autoAssist && match.phase === 'rally' && match.landingSide === 'player' && match.landingX !== null) {
+                const desiredX = Math.max(COURT_LEFT, Math.min(NET_X - 42, match.landingX - 10));
+                const diff = desiredX - player.x;
+                if (Math.abs(diff) > 10) {
+                    player.vx = Math.sign(diff) * (player.speed * 0.82);
+                } else {
+                    player.vx = 0;
+                }
+            } else {
+                player.vx = 0;
+            }
+
+            updateAI();
+
+            // Update Both Fighters
+            [player, ai].forEach(f => {
+                f.x += f.vx;
+
+                if (!f.grounded) {
+                    f.vy += 0.64;
+                    f.y += f.vy;
+                    if (f.y >= GROUND_Y) {
+                        f.y = GROUND_Y;
+                        f.vy = 0;
+                        f.grounded = true;
+                        spawnDust(f.x, GROUND_Y, 4);
+                    }
+                }
+
+                // Court Boundaries
+                if (!f.isAI) {
+                    f.x = Math.max(COURT_LEFT - 18, Math.min(NET_X - 34, f.x));
+                } else {
+                    f.x = Math.max(NET_X + 34, Math.min(COURT_RIGHT + 18, f.x));
+                }
+
+                if (f.swingTimer > 0) f.swingTimer--;
+                if (f.swingCooldown > 0) f.swingCooldown--;
+
+                // Active Multi-Frame Swing Hit Window for Player
+                if (!f.isAI && f.activeSwingTimer > 0) {
+                    f.activeSwingTimer--;
+                    if (match.phase === 'rally') {
+                        checkAndExecuteStrike(f);
+                    }
+                }
+
+                // Auto-trigger Smash at jump apex if 1-Tap Auto-Jump Smash was initiated
+                if (!f.isAI && f.autoSmashPending && !f.grounded && f.vy >= -3.5) {
+                    f.activeSwingTimer = 14;
+                    f.swingTimer = f.swingDuration;
+                    checkAndExecuteStrike(f);
+                }
+
+                if (Math.abs(f.vx) > 0.4 && f.grounded) {
+                    f.animRunFrame += 0.24;
+                } else {
+                    f.animRunFrame = 0;
+                }
+
+                // Emit Sweat Drops when AI is Fatigued
+                if (f.isAI && f.stamina < 0.65 && Math.random() < (1.0 - f.stamina) * 0.22) {
+                    particles.push({
+                        x: f.x + (Math.random() - 0.5) * 20,
+                        y: f.y - 68,
+                        vx: (Math.random() - 0.5) * 1.2,
+                        vy: -1.5 - Math.random(),
+                        size: 3,
+                        life: 14,
+                        maxLife: 14
+                    });
+                }
+
+                f.blinkTimer--;
+                if (f.blinkTimer < -8) f.blinkTimer = 110 + Math.random() * 140;
+            });
+
+            // Keep Shuttle Attached During Serve Phase
+            if (match.phase === 'serve') {
+                if (match.server === 'player') {
+                    shuttle.x = player.x + 28;
+                    shuttle.y = player.y - 48;
+                } else {
+                    shuttle.x = ai.x - 28;
+                    shuttle.y = ai.y - 48;
+                }
+            }
+
+            // Shuttle Aerodynamic Physics in Rally
+            if (match.phase === 'rally') {
+                if (shuttle.hitCooldown > 0) shuttle.hitCooldown--;
+
+                // Evaluate Occasional Cinematic Focus Bullet-Time Slow-Mo Trigger!
+                if (
+                    config.slowMoEnabled &&
+                    !match.slowMoTriggeredThisShot &&
+                    match.slowMoEligibleShot &&
+                    shuttle.lastHitBy === 'ai' &&
+                    shuttle.vx < 0 &&
+                    shuttle.x < NET_X - 15
+                ) {
+                    const strikeX = player.x + 18;
+                    const strikeY = player.y - 46;
+                    const distToPlayer = Math.hypot(shuttle.x - strikeX, shuttle.y - strikeY);
+                    const distToLanding = match.landingX !== null ? Math.abs(shuttle.x - match.landingX) : 999;
+
+                    // Trigger brief ~0.45s reflex slow-mo when incoming shot approaches strike zone or sweet spot
+                    if (distToPlayer < 168 || (distToLanding < 120 && shuttle.y > 165)) {
+                        match.slowMoTimer = 27; // ~0.45 seconds at 60fps
+                        match.slowMoMaxTimer = 27;
+                        match.slowMoTriggeredThisShot = true;
+                        match.slowMoReason = shuttle.isAISmash
+                            ? '⚡ REFLEX SAVE SLOW-MO!'
+                            : (shuttle.isWeakPopup ? '⚡ SWEET-SPOT SMASH SLOW-MO!' : '⚡ FOCUS SLOW-MO!');
+                        sfx.focusSlowMo();
+                    }
+                }
+
+                // Normal crisp speed by default; momentarily dips to 0.38x during Focus Bullet-Time window
+                const slowMoFactor = match.slowMoTimer > 0 ? 0.38 : 1.0;
+                const dt = GAME_PHYSICS.shuttleTimeScale * slowMoFactor;
+
+                shuttle.trail.push({ x: shuttle.x, y: shuttle.y });
+                if (shuttle.trail.length > 9) shuttle.trail.shift();
+
+                shuttle.vy += GRAVITY * dt;
+                const frameDrag = Math.pow(DRAG, dt);
+                shuttle.vx *= frameDrag;
+                shuttle.vy *= frameDrag;
+
+                shuttle.x += shuttle.vx * dt;
+                shuttle.y += shuttle.vy * dt;
+
+                shuttle.rotation = Math.atan2(shuttle.vy, shuttle.vx);
+
+                // Net Collision Detection
+                const netHalfThickness = 7;
+                if (Math.abs(shuttle.x - NET_X) < netHalfThickness && shuttle.y >= NET_TOP_Y) {
+                    if (shuttle.y < NET_TOP_Y + 14) {
+                        // Net Cord Roll-Over!
+                        shuttle.y = NET_TOP_Y - 2;
+                        shuttle.vy = -Math.abs(shuttle.vy) * 0.48 - 1.4;
+                        shuttle.vx *= 0.68;
+                        sfx.netTouch();
+                        spawnSparks(shuttle.x, NET_TOP_Y, 6, false);
+                        spawnFloatingText('NET CORD!', NET_X, NET_TOP_Y - 15);
+                        predictShuttleLanding();
+                    } else {
+                        // Blocked by Net Mesh
+                        shuttle.vx *= -0.25;
+                        shuttle.x = shuttle.x < NET_X ? NET_X - netHalfThickness - 2 : NET_X + netHalfThickness + 2;
+                        sfx.netTouch();
+                        spawnSparks(NET_X, shuttle.y, 7, false);
+                        predictShuttleLanding();
+                    }
+                }
+
+                // Ground Touch -> Point Evaluation
+                if (shuttle.y >= GROUND_Y - 6) {
+                    shuttle.y = GROUND_Y - 6;
+                    spawnDust(shuttle.x, GROUND_Y, 10);
+
+                    if (shuttle.x < NET_X) {
+                        if (shuttle.x < COURT_LEFT - 10) {
+                            if (shuttle.lastHitBy === 'ai') {
+                                scorePoint('player', 'AI HIT OUT LONG!');
+                            } else {
+                                scorePoint('ai', 'FAULT ON PLAYER SIDE');
+                            }
+                        } else {
+                            scorePoint('ai', 'SHUTTLE LANDED IN');
+                        }
+                    } else {
+                        if (shuttle.x > COURT_RIGHT + 10) {
+                            if (shuttle.lastHitBy === 'player') {
+                                scorePoint('ai', 'SHOT OUT LONG!');
+                            } else {
+                                scorePoint('player', 'AI FAULT');
+                            }
+                        } else {
+                            scorePoint('player', 'WINNER LANDED IN!');
+                        }
+                    }
+                }
+            } else if (match.phase === 'point_pause') {
+                match.pauseTimer--;
+                if (match.pauseTimer <= 0) {
+                    setupServe(match.server);
+                }
+            }
+
+            // Update Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            // Update Floating Text Popups
+            for (let i = floatingPopups.length - 1; i >= 0; i--) {
+                const fp = floatingPopups[i];
+                fp.y -= 0.85;
+                fp.life--;
+                if (fp.life <= 0) floatingPopups.splice(i, 1);
+            }
+        }
+
+        function getPalette() {
+            if (config.darkMode) {
+                return {
+                    bg: '#18181b',
+                    fg: '#e4e4e7',
+                    muted: '#9ca3af',
+                    subtle: '#27272a'
+                };
+            }
+            return {
+                bg: '#f7f7f7',
+                fg: '#535353',
+                muted: '#8a8a8a',
+                subtle: '#e2e2e2'
+            };
+        }
+
+        function drawPixelCloud(x, y, scale, color) {
+            ctx.save();
+            ctx.translate(Math.floor(x), Math.floor(y));
+            ctx.scale(scale, scale);
+            ctx.fillStyle = color;
+            ctx.fillRect(8, 0, 20, 4);
+            ctx.fillRect(4, 4, 32, 4);
+            ctx.fillRect(0, 8, 40, 6);
+            ctx.fillRect(6, 14, 28, 3);
+            ctx.restore();
+        }
+
+        /**
+         * ARENA 1 (DEFAULT): CLEAN INDOOR INTERNATIONAL STADIUM
+         * Features an uncluttered playing backdrop for crisp shuttlecock visibility,
+         * high-bay roof trusses, overhead LED light banks, the "DINO OPEN ARENA" banner,
+         * and the Official Umpire High-Chair with a seated Pixel Dino Umpire tracking the rally!
+         */
+        function drawIndoorStadiumArena(pal) {
+            ctx.save();
+
+            // 1. High-Ceiling Steel Roof Trusses
+            ctx.strokeStyle = pal.muted;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, W, 24);
+            for (let tx = 0; tx < W; tx += 48) {
+                ctx.beginPath();
+                ctx.moveTo(tx, 0);
+                ctx.lineTo(tx + 24, 24);
+                ctx.lineTo(tx + 48, 0);
+                ctx.stroke();
+            }
+
+            // Minimalist outer structural hall pillars (kept at far edges away from players)
+            ctx.strokeStyle = pal.subtle;
+            ctx.lineWidth = 2;
+            [36, W - 36].forEach(cx => {
+                ctx.beginPath();
+                ctx.moveTo(cx, 24);
+                ctx.lineTo(cx, GROUND_Y);
+                ctx.stroke();
+            });
+
+            // 2. Overhead LED Floodlight Banks
+            const lightPositions = [165, 355, 605, 795];
+            lightPositions.forEach(lx => {
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(lx - 26, 24, 52, 7);
+                ctx.fillStyle = pal.bg;
+                for (let b = -20; b <= 16; b += 10) {
+                    ctx.fillRect(lx + b, 26, 6, 3);
+                }
+            });
+
+            // 3. Clean "DINO OPEN ARENA" Hanging Banners (Upper Left & Right, leaving playing area completely clean)
+            [125, W - 125].forEach(bx => {
+                ctx.strokeStyle = pal.muted;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(bx - 36, 24); ctx.lineTo(bx - 36, 86);
+                ctx.moveTo(bx + 36, 24); ctx.lineTo(bx + 36, 86);
+                ctx.stroke();
+
+                ctx.fillStyle = pal.bg;
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 2;
+                ctx.fillRect(bx - 64, 86, 128, 38);
+                ctx.strokeRect(bx - 64, 86, 128, 38);
+
+                ctx.fillStyle = pal.fg;
+                ctx.font = '8px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('DINO OPEN', bx, 103);
+                ctx.fillStyle = pal.muted;
+                ctx.font = '7px "Press Start 2P", monospace';
+                ctx.fillText('ARENA', bx, 117);
+            });
+
+            // 4. Center Official Umpire High-Chair + Seated Pixel Dino Umpire (Behind Net)
+            const ux = NET_X + 26;
+            const seatY = GROUND_Y - 82;
+
+            // High-chair ladder & frame
+            ctx.strokeStyle = pal.muted;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ux - 11, GROUND_Y);
+            ctx.lineTo(ux - 7, seatY);
+            ctx.moveTo(ux + 11, GROUND_Y);
+            ctx.lineTo(ux + 7, seatY);
+            for (let sy = GROUND_Y - 16; sy >= seatY + 12; sy -= 16) {
+                ctx.moveTo(ux - 9, sy);
+                ctx.lineTo(ux + 9, sy);
+            }
+            // Chair backrest & desk tray
+            ctx.moveTo(ux + 7, seatY);
+            ctx.lineTo(ux + 7, seatY - 22);
+            ctx.stroke();
+
+            // Seat cushion
+            ctx.fillStyle = pal.muted;
+            ctx.fillRect(ux - 10, seatY - 3, 20, 5);
+
+            // Seated Pixel Dino Umpire Character (head turns to follow the shuttlecock!)
+            const lookDir = shuttle.x < NET_X ? -1 : 1;
+            ctx.save();
+            ctx.translate(ux, seatY - 3);
+
+            // Umpire Torso & Official Sweater Vest
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(-5, -16, 10, 16);
+            ctx.fillStyle = pal.bg;
+            ctx.fillRect(-2, -15, 4, 5); // Collar
+
+            // Dangling Dino Legs on Chair Footrest
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(-6, 0, 4, 9);
+            ctx.fillRect(1, 0, 4, 9);
+
+            // Umpire Arm raised during Point Score / Serve Call
+            if (match.phase === 'point_pause') {
+                const winDir = match.server === 'player' ? -1 : 1;
+                ctx.fillRect(winDir * 5, -22, winDir * 9, 3);
+            } else {
+                ctx.fillRect(-8, -11, 5, 3);
+            }
+
+            // Umpire Dino Head (turns left/right watching the shuttle)
+            ctx.save();
+            ctx.scale(lookDir, 1);
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(-4, -28, 13, 9);   // Snout & head
+            ctx.fillRect(-3, -30, 9, 2);    // Official Umpire Cap crown
+            ctx.fillRect(-3, -29, 14, 2);   // Cap visor
+            ctx.fillStyle = pal.bg;
+            ctx.fillRect(1, -26, 2, 2);     // Eye
+            ctx.restore();
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+        /**
+         * ARENA 2: TOKYO CHAMPIONSHIP CYBER DOME (NO CROWD)
+         * Arched geodesic dome structural ribs, center-hung Live Jumbotron with shot speed (KM/H),
+         * and clean minimalist tiered architectural acoustic wall louvers.
+         */
+        function drawTokyoDomeArena(pal) {
+            ctx.save();
+
+            // 1. Curved Geodesic Dome Ribs
+            ctx.strokeStyle = pal.muted;
+            ctx.lineWidth = 2;
+            for (let r = 1; r <= 3; r++) {
+                ctx.beginPath();
+                ctx.ellipse(W / 2, GROUND_Y + 40, 260 + r * 140, 240 + r * 85, 0, Math.PI, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Radial geodesic struts
+            for (let angle = Math.PI + 0.25; angle < Math.PI * 2 - 0.20; angle += 0.32) {
+                ctx.strokeStyle = pal.subtle;
+                ctx.beginPath();
+                ctx.moveTo(W / 2 + Math.cos(angle) * 180, GROUND_Y + Math.sin(angle) * 160);
+                ctx.lineTo(W / 2 + Math.cos(angle) * 680, GROUND_Y + Math.sin(angle) * 480);
+                ctx.stroke();
+            }
+
+            // 2. Clean Architectural Tiered Louver Ring (No Crowd Dots)
+            ctx.strokeStyle = pal.subtle;
+            ctx.lineWidth = 2;
+            [236, 266, 296, 326].forEach((ly, i) => {
+                const inset = 40 + i * 8;
+                ctx.beginPath();
+                ctx.moveTo(inset, ly);
+                ctx.lineTo(W - inset, ly);
+                ctx.stroke();
+            });
+
+            // 3. Center-Hung Giant Jumbotron Live Telemetry Board
+            const jw = 300;
+            const jh = 58;
+            const jx = (W - jw) / 2;
+            const jy = 86;
+
+            // Suspension cables
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(jx + 45, 0); ctx.lineTo(jx + 45, jy);
+            ctx.moveTo(jx + jw - 45, 0); ctx.lineTo(jx + jw - 45, jy);
+            ctx.stroke();
+
+            ctx.fillStyle = pal.bg;
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 3;
+            ctx.fillRect(jx, jy, jw, jh);
+            ctx.strokeRect(jx, jy, jw, jh);
+
+            ctx.fillStyle = pal.fg;
+            ctx.font = '8px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`TOKYO SUPER DOME // AI:${config.difficulty.toUpperCase()}`, W / 2, jy + 18);
+
+            ctx.fillStyle = pal.muted;
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            const speedStr = match.lastShotKmh > 0 ? `${match.lastShotKmh} KM/H` : 'READY';
+            ctx.fillText(`SPEED: ${speedStr}  |  RALLY: ${match.rally}`, W / 2, jy + 36);
+            ctx.fillText(`${match.lastShotName}`, W / 2, jy + 50);
+
+            // 4. Lower Perimeter Architectural Wall
+            ctx.fillStyle = pal.bg;
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 2;
+            ctx.fillRect(40, GROUND_Y - 28, W - 80, 22);
+            ctx.strokeRect(40, GROUND_Y - 28, W - 80, 22);
+
+            ctx.fillStyle = pal.muted;
+            ctx.font = '7px "Press Start 2P", monospace';
+            ctx.fillText('CYBER BADMINTON GRAND PRIX  //  OFFICIAL BWF COURT 1', W / 2, GROUND_Y - 13);
+
+            ctx.restore();
+        }
+
+        /**
+         * ARENA 3: CLASSIC CHROME DINO OUTDOOR DESERT
+         * Nostalgic scrolling pixel clouds, distant desert mesas, pixel cacti, and flying pterodactyl.
+         */
+        function drawDesertArena(pal) {
+            ctx.save();
+
+            // 1. Scrolling Pixel Clouds
+            clouds.forEach(c => drawPixelCloud(c.x, c.y, c.scale, pal.muted));
+
+            // 2. Distant Desert Mesas / Dunes
+            ctx.strokeStyle = pal.subtle;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, GROUND_Y - 35);
+            ctx.lineTo(130, GROUND_Y - 35);
+            ctx.lineTo(165, GROUND_Y - 75);
+            ctx.lineTo(270, GROUND_Y - 75);
+            ctx.lineTo(310, GROUND_Y - 25);
+            ctx.lineTo(610, GROUND_Y - 25);
+            ctx.lineTo(655, GROUND_Y - 68);
+            ctx.lineTo(750, GROUND_Y - 68);
+            ctx.lineTo(790, GROUND_Y - 30);
+            ctx.lineTo(W, GROUND_Y - 30);
+            ctx.stroke();
+
+            // 3. Classic Pixel Cacti behind the baseline/court
+            ctx.fillStyle = pal.muted;
+            desertCacti.forEach(c => {
+                const cx = c.x;
+                const cy = GROUND_Y;
+                ctx.fillRect(cx - 3, cy - c.h, 6, c.h);
+                ctx.fillRect(cx - 11, cy - c.h + 10, 6, 4);
+                ctx.fillRect(cx - 11, cy - c.h + 2, 4, 12);
+                ctx.fillRect(cx + 5, cy - c.h + 14, 6, 4);
+                ctx.fillRect(cx + 7, cy - c.h + 6, 4, 12);
+            });
+
+            // 4. Flying Pixel Pterodactyl
+            const px = Math.floor(ptero.x);
+            const py = Math.floor(ptero.y);
+            const wingUp = Math.floor(ptero.wingFrame) % 2 === 0;
+            ctx.fillStyle = pal.muted;
+            ctx.fillRect(px, py, 18, 6);
+            ctx.fillRect(px - 8, py + 2, 8, 4);
+            if (wingUp) {
+                ctx.fillRect(px + 4, py - 10, 8, 10);
+            } else {
+                ctx.fillRect(px + 4, py + 6, 8, 9);
+            }
+
+            ctx.restore();
+        }
+
+        // Draw T-Rex Fighter Sprite + Badminton Racket + AI Stamina Meter
+        function drawDinoFighter(fighter, pal) {
+            ctx.save();
+            ctx.translate(Math.floor(fighter.x), Math.floor(fighter.y));
+
+            // Ground Shadow
+            const heightOffGround = Math.max(0, GROUND_Y - fighter.y);
+            const shadowWidth = Math.max(12, 28 - heightOffGround * 0.14);
+            ctx.fillStyle = pal.muted;
+            ctx.fillRect(-shadowWidth / 2, heightOffGround - 2, shadowWidth, 4);
+
+            // AI Stamina & Fatigue Bar Above Robo-Rex
+            if (fighter.isAI && match.phase === 'rally') {
+                const barW = 40;
+                const barH = 5;
+                ctx.fillStyle = pal.bg;
+                ctx.fillRect(-barW / 2, -84, barW, barH);
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(-barW / 2, -84, barW, barH);
+                ctx.fillStyle = fighter.stamina < 0.45 ? pal.muted : pal.fg;
+                ctx.fillRect(-barW / 2 + 1, -83, Math.max(2, (barW - 2) * fighter.stamina), barH - 2);
+            }
+
+            ctx.scale(fighter.facing, 1);
+
+            const P = 3; // Pixel block unit
+            ctx.fillStyle = pal.fg;
+
+            // Head & Snout
+            ctx.fillRect(-2 * P, -22 * P, 10 * P, 6 * P);
+            ctx.fillRect(-1 * P, -23 * P, 8 * P, 1 * P);
+            // Open Jaw during Swing or Jump
+            if (fighter.swingTimer > 0 || !fighter.grounded) {
+                ctx.fillRect(2 * P, -15 * P, 5 * P, 2 * P);
+            } else {
+                ctx.fillRect(1 * P, -16 * P, 6 * P, 2 * P);
+            }
+
+            // Eye (Blinking or Robo Visor)
+            ctx.fillStyle = pal.bg;
+            if (fighter.blinkTimer >= 0) {
+                ctx.fillRect(1 * P, -21 * P, 2 * P, 2 * P);
+            } else {
+                ctx.fillRect(1 * P, -20 * P, 2 * P, 1 * P);
+            }
+
+            ctx.fillStyle = pal.fg;
+            if (fighter.isAI) {
+                // Robo-Rex Antenna & Visor Stripe
+                ctx.fillRect(0 * P, -25 * P, 1 * P, 2 * P);
+                ctx.fillRect(-1 * P, -26 * P, 3 * P, 1 * P);
+            } else {
+                // Player Headband Tail
+                ctx.fillRect(-4 * P, -21 * P, 2 * P, 2 * P);
+                ctx.fillRect(-6 * P, -20 * P, 2 * P, 1 * P);
+            }
+
+            // Neck & Torso
+            ctx.fillRect(-3 * P, -16 * P, 6 * P, 4 * P);
+            ctx.fillRect(-5 * P, -12 * P, 8 * P, 7 * P);
+            ctx.fillRect(-6 * P, -10 * P, 1 * P, 5 * P);
+
+            // Dino Tail
+            ctx.fillRect(-8 * P, -10 * P, 3 * P, 4 * P);
+            ctx.fillRect(-10 * P, -11 * P, 2 * P, 3 * P);
+            ctx.fillRect(-12 * P, -12 * P, 2 * P, 2 * P);
+
+            // Dino Arm
+            ctx.fillRect(3 * P, -11 * P, 3 * P, 2 * P);
+            ctx.fillRect(5 * P, -10 * P, 1 * P, 2 * P);
+
+            // Animated Legs
+            const step = Math.floor(fighter.animRunFrame) % 2;
+            if (!fighter.grounded) {
+                ctx.fillRect(-3 * P, -5 * P, 2 * P, 3 * P);
+                ctx.fillRect(0 * P, -5 * P, 2 * P, 4 * P);
+            } else if (Math.abs(fighter.vx) > 0.3) {
+                if (step === 0) {
+                    ctx.fillRect(-4 * P, -5 * P, 2 * P, 5 * P);
+                    ctx.fillRect(-3 * P, -1 * P, 3 * P, 1 * P);
+                    ctx.fillRect(1 * P, -5 * P, 2 * P, 3 * P);
+                } else {
+                    ctx.fillRect(-4 * P, -5 * P, 2 * P, 3 * P);
+                    ctx.fillRect(1 * P, -5 * P, 2 * P, 5 * P);
+                    ctx.fillRect(1 * P, -1 * P, 3 * P, 1 * P);
+                }
+            } else {
+                ctx.fillRect(-4 * P, -5 * P, 2 * P, 5 * P);
+                ctx.fillRect(-4 * P, -1 * P, 3 * P, 1 * P);
+                ctx.fillRect(1 * P, -5 * P, 2 * P, 5 * P);
+                ctx.fillRect(1 * P, -1 * P, 3 * P, 1 * P);
+            }
+
+            // Badminton Racket + Swing Arc
+            ctx.save();
+            ctx.translate(4 * P, -10 * P);
+
+            let angle = -0.45;
+            if (fighter.swingTimer > 0) {
+                const progress = 1 - (fighter.swingTimer / fighter.swingDuration);
+                angle = -1.65 + Math.sin(progress * Math.PI) * 2.75;
+
+                // Motion Swoosh Arc
+                ctx.strokeStyle = pal.muted;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 38, -1.5, angle, false);
+                ctx.stroke();
+            }
+
+            ctx.rotate(angle);
+
+            // Handle & Shaft
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(-2, -26, 3, 26);
+
+            // Racket Head Hoop
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, -39, 11, 14, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Cross Strings
+            ctx.strokeStyle = pal.muted;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-6, -39); ctx.lineTo(6, -39);
+            ctx.moveTo(-7, -34); ctx.lineTo(7, -34);
+            ctx.moveTo(-7, -44); ctx.lineTo(7, -44);
+            ctx.moveTo(0, -51);  ctx.lineTo(0, -27);
+            ctx.stroke();
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+        function drawShuttlecock(pal) {
+            const strikeX = player.x + 18;
+            const strikeY = player.y - 46;
+            const distToPlayer = Math.hypot(shuttle.x - strikeX, shuttle.y - strikeY);
+            const inStrikeRange = match.phase === 'rally' && shuttle.x < NET_X + 26 && distToPlayer <= GAME_PHYSICS.hitRadius;
+
+            // 0. Cinematic Focus Bullet-Time Slow-Mo Speed Lines & HUD Ring
+            if (match.slowMoTimer > 0 && match.phase === 'rally') {
+                ctx.save();
+                // Outer Focus Target Ring around Shuttle
+                const pulseR = 32 + Math.sin(performance.now() * 0.035) * 5;
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(shuttle.x, shuttle.y, pulseR, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Subtle Horizontal Reflex Speed Lines across Top/Bottom of Court
+                ctx.strokeStyle = pal.muted;
+                ctx.lineWidth = 1.5;
+                for (let i = 0; i < 6; i++) {
+                    const lx = ((performance.now() * 0.6 + i * 170) % (W - 140)) + 40;
+                    const ly = i % 2 === 0 ? (92 + i * 14) : (GROUND_Y - 55 - i * 12);
+                    ctx.beginPath();
+                    ctx.moveTo(lx, ly);
+                    ctx.lineTo(lx + 55, ly);
+                    ctx.stroke();
+                }
+
+                // Focus Slow-Mo HUD Pill above Player/Court
+                const pillW = 240;
+                const pillH = 22;
+                const px = Math.max(60, Math.min(NET_X - pillW - 10, shuttle.x - pillW / 2));
+                const py = Math.max(90, shuttle.y - 58);
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(px, py, pillW, pillH);
+                ctx.fillStyle = pal.bg;
+                ctx.font = '8px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(match.slowMoReason, px + pillW / 2, py + 15);
+                ctx.restore();
+            }
+
+            // 1. Visual "IN RANGE" Strike Indicator Ring around Shuttle
+            if (inStrikeRange) {
+                ctx.save();
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.arc(shuttle.x, shuttle.y, 24, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = pal.fg;
+                ctx.font = '8px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('HIT!', shuttle.x, shuttle.y - 29);
+                ctx.restore();
+            }
+
+            // 2. Aerodynamic Trail
+            for (let i = 0; i < shuttle.trail.length; i++) {
+                const t = shuttle.trail[i];
+                const alpha = ((i + 1) / shuttle.trail.length) * 0.32;
+                ctx.fillStyle = pal.muted;
+                ctx.globalAlpha = alpha;
+                const sz = 3 + (i / shuttle.trail.length) * 5;
+                ctx.fillRect(t.x - sz / 2, t.y - sz / 2, sz, sz);
+            }
+            ctx.globalAlpha = 1.0;
+
+            // 3. Shuttlecock Sprite
+            ctx.save();
+            ctx.translate(shuttle.x, shuttle.y);
+            ctx.rotate(shuttle.rotation);
+
+            // Feathered Skirt Cone
+            ctx.fillStyle = pal.bg;
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -4);
+            ctx.lineTo(-16, -10);
+            ctx.lineTo(-13, 0);
+            ctx.lineTo(-16, 10);
+            ctx.lineTo(0, 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Cork Nose
+            ctx.fillStyle = pal.fg;
+            ctx.beginPath();
+            ctx.arc(3, 0, 5.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawLandingReticle(pal) {
+            if (match.phase !== 'rally' || match.landingX === null) return;
+
+            ctx.save();
+            const lx = match.landingX;
+            const pulse = Math.sin(performance.now() * 0.012) * 4;
+
+            ctx.strokeStyle = match.landingSide === 'player' ? pal.fg : pal.muted;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(lx - 15 - pulse, GROUND_Y + 4);
+            ctx.lineTo(lx + 15 + pulse, GROUND_Y + 4);
+            ctx.stroke();
+
+            ctx.fillStyle = match.landingSide === 'player' ? pal.fg : pal.muted;
+            ctx.fillRect(lx - 3, GROUND_Y - 5, 6, 6);
+
+            if (match.landingSide === 'player') {
+                ctx.font = '7px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('TARGET', lx, GROUND_Y + 17);
+            }
+
+            ctx.restore();
+        }
+
+        function drawPauseModal(pal) {
+            ctx.save();
+            ctx.fillStyle = pal.bg;
+            ctx.globalAlpha = 0.86;
+            ctx.fillRect(0, 0, W, H);
+            ctx.globalAlpha = 1.0;
+
+            const boxW = 420;
+            const boxH = 165;
+            const bx = (W - boxW) / 2;
+            const by = (H - boxH) / 2;
+
+            ctx.fillStyle = pal.bg;
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 4;
+            ctx.fillRect(bx, by, boxW, boxH);
+            ctx.strokeRect(bx, by, boxW, boxH);
+
+            ctx.fillStyle = pal.fg;
+            ctx.textAlign = 'center';
+            ctx.font = '18px "Press Start 2P", monospace';
+            ctx.fillText('GAME PAUSED', W / 2, by + 50);
+
+            ctx.fillStyle = pal.muted;
+            ctx.font = '700 12px "JetBrains Mono", monospace';
+            ctx.fillText('PRESS [P], [ESC], OR TAP COURT TO RESUME', W / 2, by + 88);
+            ctx.fillText('Customize Arena, AI Tier, or Keys above anytime!', W / 2, by + 114);
+            ctx.restore();
+        }
+
+        function draw() {
+            const pal = getPalette();
+
+            ctx.save();
+            if (match.screenShake > 0) {
+                const sx = (Math.random() - 0.5) * match.screenShake * 2;
+                const sy = (Math.random() - 0.5) * match.screenShake * 2;
+                ctx.translate(sx, sy);
+            }
+
+            // 1. Background Fill
+            ctx.fillStyle = pal.bg;
+            ctx.fillRect(0, 0, W, H);
+
+            // 2. Selected Environment Arena Backdrop
+            if (config.arena === 'stadium') {
+                drawIndoorStadiumArena(pal);
+            } else if (config.arena === 'dome') {
+                drawTokyoDomeArena(pal);
+            } else {
+                drawDesertArena(pal);
+            }
+
+            // 3. Scoreboard
+            ctx.fillStyle = pal.fg;
+            ctx.font = '26px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+
+            const pScoreStr = String(match.playerScore).padStart(2, '0');
+            const aScoreStr = String(match.aiScore).padStart(2, '0');
+
+            ctx.fillText(pScoreStr, W / 2 - 110, 56);
+            ctx.fillStyle = pal.muted;
+            ctx.fillText('-', W / 2, 56);
+            ctx.fillStyle = pal.fg;
+            ctx.fillText(aScoreStr, W / 2 + 110, 56);
+
+            ctx.font = '10px "Press Start 2P", monospace';
+            ctx.fillStyle = pal.muted;
+            ctx.fillText('1P DINO', W / 2 - 110, 74);
+            ctx.fillText(`ROBO (${ai.aiMoodLabel})`, W / 2 + 110, 74);
+
+            // Active Server Indicator
+            ctx.fillStyle = pal.fg;
+            const serveBadgeX = match.server === 'player' ? (W / 2 - 180) : (W / 2 + 180);
+            ctx.fillRect(serveBadgeX - 5, 38, 10, 10);
+
+            // 4. Court Floor Surface & Markings
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, GROUND_Y);
+            ctx.lineTo(W, GROUND_Y);
+            ctx.stroke();
+
+            if (config.arena === 'desert') {
+                ctx.fillStyle = pal.muted;
+                groundPebbles.forEach(p => {
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                });
+            } else {
+                // Indoor BWF Synthetic Court Mat Perspective Lines
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(COURT_LEFT, GROUND_Y);
+                ctx.lineTo(COURT_LEFT - 28, GROUND_Y + 42);
+                ctx.lineTo(COURT_RIGHT + 28, GROUND_Y + 42);
+                ctx.lineTo(COURT_RIGHT, GROUND_Y);
+                ctx.stroke();
+
+                // Center & Service Court Floor Lines
+                ctx.strokeStyle = pal.muted;
+                ctx.beginPath();
+                ctx.moveTo(NET_X, GROUND_Y);
+                ctx.lineTo(NET_X, GROUND_Y + 42);
+                ctx.moveTo(NET_X - SERVICE_LINE_OFFSET, GROUND_Y);
+                ctx.lineTo(NET_X - SERVICE_LINE_OFFSET - 8, GROUND_Y + 42);
+                ctx.moveTo(NET_X + SERVICE_LINE_OFFSET, GROUND_Y);
+                ctx.lineTo(NET_X + SERVICE_LINE_OFFSET + 8, GROUND_Y + 42);
+                ctx.stroke();
+            }
+
+            // 5. Court Boundary & Service Line Ticks (Clean floor without text labels)
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(COURT_LEFT - 2, GROUND_Y - 8, 4, 16);
+            ctx.fillRect(COURT_RIGHT - 2, GROUND_Y - 8, 4, 16);
+
+            ctx.fillStyle = pal.muted;
+            ctx.fillRect(NET_X - SERVICE_LINE_OFFSET, GROUND_Y - 5, 3, 10);
+            ctx.fillRect(NET_X + SERVICE_LINE_OFFSET, GROUND_Y - 5, 3, 10);
+
+            // 6. Center Net Post & Mesh
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(NET_X - 4, NET_TOP_Y, 8, NET_HEIGHT);
+            ctx.fillRect(NET_X - 6, NET_TOP_Y, 12, 6);
+
+            ctx.fillStyle = pal.muted;
+            for (let y = NET_TOP_Y + 10; y < GROUND_Y - 6; y += 8) {
+                ctx.fillRect(NET_X - 2, y, 4, 4);
+            }
+
+            // 7. Shuttle Landing Reticle
+            drawLandingReticle(pal);
+
+            // 8. Fighters
+            drawDinoFighter(player, pal);
+            drawDinoFighter(ai, pal);
+
+            // 9. Shuttlecock
+            drawShuttlecock(pal);
+
+            // 10. Particles & Popups
+            ctx.fillStyle = pal.fg;
+            particles.forEach(p => {
+                ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+            });
+            ctx.globalAlpha = 1.0;
+
+            floatingPopups.forEach(fp => {
+                ctx.globalAlpha = Math.max(0, fp.life / fp.maxLife);
+                ctx.fillStyle = pal.fg;
+                ctx.font = '9px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(fp.text, fp.x, fp.y);
+            });
+            ctx.globalAlpha = 1.0;
+
+            // 11. Banner Prompts
+            if (match.phase !== 'rally' && !match.paused) {
+                const bannerY = config.arena === 'dome' ? 166 : 152;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = pal.fg;
+                ctx.font = '13px "Press Start 2P", monospace';
+                ctx.fillText(match.pointReason, W / 2, bannerY);
+
+                ctx.fillStyle = pal.muted;
+                ctx.font = '700 11px "JetBrains Mono", monospace';
+                ctx.fillText(match.subMessage, W / 2, bannerY + 20);
+            }
+
+            // 12. Instant Mid-Game Setting Change Toast
+            if (match.toastTimer > 0) {
+                ctx.save();
+                const tw = 340;
+                const th = 28;
+                const tx = (W - tw) / 2;
+                const ty = H - 36;
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(tx, ty, tw, th);
+                ctx.fillStyle = pal.bg;
+                ctx.font = '9px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(match.toastText, W / 2, ty + 19);
+                ctx.restore();
+            }
+
+            // 13. Pause Overlay
+            if (match.paused) {
+                drawPauseModal(pal);
+            }
+
+            ctx.restore();
+        }
+
+        // Single-Level UI Control Callbacks
+        function togglePause() {
+            match.paused = !match.paused;
+            const btn = document.getElementById('btn-pause');
+            if (btn) btn.classList.toggle('selected', match.paused);
+            if (pauseLabelEl) pauseLabelEl.textContent = match.paused ? 'RESUME (P)' : 'PAUSE (P)';
+            sfx.pauseBeep();
+        }
+
+        function setArena(arenaKey) {
+            if (isArenaLocked()) {
+                showStatusToast('LOCKED IN MATCH! CLICK [RESET] TO SWITCH ARENA');
+                sfx.netTouch();
+                return;
+            }
+            config.arena = arenaKey;
+            ['stadium', 'dome', 'desert'].forEach(a => {
+                const btn = document.getElementById(`env-${a}`);
+                if (btn) btn.classList.toggle('selected', a === arenaKey);
+            });
+            try {
+                localStorage.setItem('dino_badminton_arena', arenaKey);
+            } catch (e) {}
+            const names = {
+                stadium: 'ARENA: DINO OPEN STADIUM',
+                dome: 'ARENA: TOKYO CYBER DOME',
+                desert: 'ARENA: CLASSIC DESERT'
+            };
+            showStatusToast(names[arenaKey] || 'ARENA UPDATED');
+            updateArenaLockUI();
+            sfx.hitDrop();
+        }
+
+        function toggleSlowMo() {
+            config.slowMoEnabled = !config.slowMoEnabled;
+            if (!config.slowMoEnabled) match.slowMoTimer = 0;
+            const btn = document.getElementById('btn-slowmo');
+            const lbl = document.getElementById('slowmo-icon');
+            if (btn) btn.classList.toggle('selected', config.slowMoEnabled);
+            if (lbl) lbl.textContent = config.slowMoEnabled ? 'SLOW-MO:ON' : 'SLOW-MO:OFF';
+            showStatusToast(config.slowMoEnabled ? 'FOCUS SLOW-MO: ON' : 'FOCUS SLOW-MO: OFF');
+            sfx.hitDrop();
+        }
+
+        function setDifficulty(level) {
+            config.difficulty = level;
+            ['easy', 'medium', 'hard'].forEach(d => {
+                const btn = document.getElementById(`diff-${d}`);
+                if (btn) btn.classList.toggle('selected', d === level);
+            });
+
+            // Immediately recalculate AI speed, stamina, target & cancel any pending whiff mid-rally
+            recalculateAIMidRally();
+
+            const prof = AI_PROFILES[level] || AI_PROFILES.medium;
+            showStatusToast(`DIFFICULTY: ${prof.label}`);
+            sfx.hitClear();
+        }
+
+        function setSmashMode(mode) {
+            config.smashMode = mode;
+            ['auto', 'dedicated', 'air'].forEach(m => {
+                const btn = document.getElementById(`smode-${m}`);
+                if (btn) btn.classList.toggle('selected', m === mode);
+            });
+            sfx.hitSmash();
+        }
+
+        function setTargetPoints(pts) {
+            config.targetPoints = pts;
+            [11, 21].forEach(p => {
+                const btn = document.getElementById(`pts-${p}`);
+                if (btn) btn.classList.toggle('selected', p === pts);
+            });
+            resetMatch();
+        }
+
+        function toggleAssist() {
+            config.autoAssist = !config.autoAssist;
+            const btn = document.getElementById('btn-assist');
+            const lbl = document.getElementById('assist-icon');
+            if (btn) btn.classList.toggle('selected', config.autoAssist);
+            if (lbl) lbl.textContent = config.autoAssist ? 'AUTO-RUN:ON' : 'AUTO-RUN:OFF';
+            sfx.hitDrop();
+        }
+
+        function toggleSound() {
+            sfx.enabled = !sfx.enabled;
+            const icon = document.getElementById('sound-icon');
+            const btn = document.getElementById('btn-sound');
+            if (icon) icon.textContent = sfx.enabled ? 'SFX:ON' : 'SFX:OFF';
+            if (btn) btn.classList.toggle('selected', !sfx.enabled);
+            if (sfx.enabled) sfx.hitClear();
+        }
+
+        function toggleTheme() {
+            config.darkMode = !config.darkMode;
+            document.body.classList.toggle('dark-mode', config.darkMode);
+            const icon = document.getElementById('theme-icon');
+            const btn = document.getElementById('btn-theme');
+            if (icon) icon.textContent = config.darkMode ? 'DAY' : 'NIGHT';
+            if (btn) btn.classList.toggle('selected', config.darkMode);
+        }
+
+        function resetMatch() {
+            match.paused = false;
+            const pauseBtn = document.getElementById('btn-pause');
+            if (pauseBtn) pauseBtn.classList.remove('selected');
+            if (pauseLabelEl) pauseLabelEl.textContent = 'PAUSE (P)';
+
+            match.playerScore = 0;
+            match.aiScore = 0;
+            match.consecutiveAILead = 0;
+            match.rally = 0;
+            match.winner = null;
+            match.slowMoTimer = 0;
+            updateRallyUI();
+            updateScoreHeaderUI();
+            setupServe('player');
+            updateArenaLockUI();
+            showStatusToast('MATCH RESET // ARENA SELECT UNLOCKED');
+            sfx.jump();
+        }
+
+        // Auto-enable Auto-Run Assist on small mobile screens for immediate pick-up-and-play fun
+        if (window.innerWidth < 640) {
+            config.autoAssist = true;
+            const btn = document.getElementById('btn-assist');
+            const lbl = document.getElementById('assist-icon');
+            if (btn) btn.classList.add('selected');
+            if (lbl) lbl.textContent = 'AUTO-RUN:ON';
+        }
+
+        const TARGET_FPS = 60;
+        const FIXED_STEP_MS = 1000 / TARGET_FPS; // 16.6667ms per physics tick
+        let lastFrameTime = performance.now();
+        let timeAccumulator = 0;
+
+        function gameLoop(now) {
+            if (typeof now !== 'number') now = performance.now();
+
+            let frameDelta = now - lastFrameTime;
+            lastFrameTime = now;
+
+            // Clamp large delta spikes (e.g. switching browser tabs or window minimize)
+            if (frameDelta > 200) {
+                frameDelta = FIXED_STEP_MS;
+            }
+
+            if (!match.paused) {
+                timeAccumulator += frameDelta;
+                // Run physics updates at a strict 60Hz rate regardless of 60Hz/120Hz/144Hz/240Hz monitor or browser
+                let subSteps = 0;
+                while (timeAccumulator >= FIXED_STEP_MS && subSteps < 5) {
+                    update();
+                    timeAccumulator -= FIXED_STEP_MS;
+                    subSteps++;
+                }
+            } else {
+                timeAccumulator = 0;
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            setArena(config.arena);
+            updateKeybindLabels();
+            setupServe('player');
+            updateArenaLockUI();
+            lastFrameTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
