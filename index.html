@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>Dino Badminton - BWF World Tour Edition</title><script src="https://cdn.tailwindcss.com"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Press+Start+2P&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>Dino Badminton - DWF World Tour Edition</title><script src="https://cdn.tailwindcss.com"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Press+Start+2P&display=swap" rel="stylesheet"><style>
 :root {
 --bg-color: #f7f7f7;
 --fg-color: #535353;
@@ -87,13 +87,14 @@ image-rendering: pixelated;
 image-rendering: crisp-edges;
 touch-action: pan-y;
 }
-</style></head><body class="flex flex-col justify-between p-1.5 sm:p-2.5 gap-1.5 select-none"><header class="w-full max-w-6xl mx-auto shrink-0"><div class="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 border-b-2" style="border-color: var(--border-color);"><div class="flex items-center gap-2"><div class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded border-2 shrink-0" style="border-color: var(--border-color); background-color: var(--surface-color);"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h8v2h2v5h-2v2h-3v2h3v2h-2v2h2v5h-2v-3h-2v3H9v-4H7v-2H5v-2H3v-4h2v2h2v-2h2V9H7V4h2V2zm4 2v2h2V4h-2z"/></svg></div><div><div class="flex items-center gap-2"><h1 class="pixel-font text-[10px] sm:text-xs tracking-tight leading-none">
+.about-btn{background-color:var(--bg-color);color:var(--fg-color);border:2px solid var(--border-color);box-shadow:2px 2px 0 var(--border-color);transition:transform .06s ease,box-shadow .06s ease,background-color .12s ease;cursor:pointer;touch-action:manipulation;padding:.55rem .8rem;font-size:.72rem;line-height:1.2}.about-btn:hover{background-color:var(--surface-color)}.about-btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--border-color)}.about-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}.about-modal-backdrop.show{display:flex}.about-modal{width:min(560px,100%);background:var(--bg-color);color:var(--fg-color);border:3px solid var(--border-color);box-shadow:6px 6px 0 var(--border-color);padding:16px}.about-modal h2{margin:0 0 12px 0}.about-modal p{margin:0 0 10px 0;line-height:1.5}.about-modal .close-row{display:flex;justify-content:flex-end;margin-top:14px}.about-meta{display:grid;gap:8px;font-size:.92rem}.about-meta a{color:var(--fg-color);text-decoration:underline}
+</style><meta property="og:title" content="Dino Badminton - DWF World Tour Edition"><meta property="og:description" content="Play the retro-styled pixel badminton game featuring custom physics, opponents, and multiple arenas. Built by Sasi Nandan Boggavarapu."><meta property="og:type" content="website"><meta property="og:url" content="https://sasinandan.github.io/Badminton_dino_game/"><meta property="og:image" content="https://sasinandan.github.io/Badminton_dino_game/preview.png"><meta name="author" content="Sasi Nandan Boggavarapu"></head><body class="flex flex-col justify-between p-1.5 sm:p-2.5 gap-1.5 select-none"><header class="w-full max-w-6xl mx-auto shrink-0"><div class="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 border-b-2" style="border-color: var(--border-color);"><div class="flex items-center gap-2"><div class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded border-2 shrink-0" style="border-color: var(--border-color); background-color: var(--surface-color);"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h8v2h2v5h-2v2h-3v2h3v2h-2v2h2v5h-2v-3h-2v3H9v-4H7v-2H5v-2H3v-4h2v2h2v-2h2V9H7V4h2V2zm4 2v2h2V4h-2z"/></svg></div><div><div class="flex items-center gap-2"><h1 class="pixel-font text-[10px] sm:text-xs tracking-tight leading-none">
 DINO BADMINTON
 </h1><span id="hdr-score" class="pixel-font text-[10px] sm:text-xs px-1.5 py-0.5 rounded" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">00 - 00</span></div><p class="text-[9px] sm:text-[10px] font-semibold hidden sm:block" style="color: var(--fg-muted);">
-WORLD TOUR ARENAS &bull; PRO JUMP-SMASH AI &bull; MOBILE READY
-</p></div></div><div class="flex flex-wrap items-center gap-1 sm:gap-1.5 justify-end"><div class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">CHAR:</span><button id="char-dino" onclick="setCharacter('dino'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Play as Pixel T-Rex Dino">DINO</button><button id="char-stick" onclick="setCharacter('stick'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Play as Stick Fight Brawler">STICK</button></div><div id="arena-selector-group" class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span id="arena-hdr-label" class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">ARENA:</span><button id="env-stadium" onclick="setArena('stadium'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Dino Open Indoor Badminton Arena">STADIUM</button><button id="env-dome" onclick="setArena('dome'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Tokyo Championship Cyber Dome with Live Jumbotron">DOME</button><button id="env-desert" onclick="setArena('desert'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Classic Chrome Dino Open Desert">DESERT</button></div><button id="btn-slowmo" onclick="toggleSlowMo(); this.blur();" class="retro-btn selected text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Occasional Cinematic Bullet-Time Slow-Mo on Fast AI Smashes & Sweet-Spot Setups"><span id="slowmo-icon">SLOW-MO:ON</span></button><div class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span class="text-[9px] font-bold px-1 hidden lg:inline" style="color: var(--fg-muted);">DIFFICULTY:</span><button id="diff-easy" onclick="setDifficulty('easy'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Easy AI: Slower footwork, frequent high pop-ups & forgiving mistakes">EASY</button><button id="diff-medium" onclick="setDifficulty('medium'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Medium AI: Balanced rally partner that tires when stretched corner-to-corner">MED</button><button id="diff-hard" onclick="setDifficulty('hard'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Hard AI: Fast court coverage, jump smashes & open-court targeting">HARD</button></div><div class="hidden md:flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span class="text-[9px] font-bold px-1" style="color: var(--fg-muted);">PTS:</span><button id="pts-11" onclick="setTargetPoints(11); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold">11</button><button id="pts-21" onclick="setTargetPoints(21); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold">21</button></div><button id="btn-assist" onclick="toggleAssist(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Auto-Run helper toward the shuttle landing reticle"><span id="assist-icon">AUTO-RUN:OFF</span></button><button id="btn-sound" onclick="toggleSound(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Retro Synth Audio"><span id="sound-icon">SFX:ON</span></button><button id="btn-theme" onclick="toggleTheme(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Night Mode"><span id="theme-icon">NIGHT</span></button><button id="btn-pause" onclick="togglePause(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Pause or Resume Game (P / ESC)"><span id="pause-label">PAUSE (P)</span></button><button onclick="resetMatch(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold">
+WORLD TOUR ARENAS &bull; PRO JUMP-SMASH &bull; MOBILE READY
+</p></div></div><div class="flex flex-wrap items-center gap-1 justify-end"><div class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">CHAR:</span><button id="char-dino" onclick="setCharacter('dino'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Play as Pixel T-Rex Dino">DINO</button><button id="char-stick" onclick="setCharacter('stick'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Play as Stick Fight Brawler">STICK</button></div><div id="arena-selector-group" class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span id="arena-hdr-label" class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">ARENA:</span><button id="env-stadium" onclick="setArena('stadium'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Dino Open Indoor Badminton Arena">STADIUM</button><button id="env-dome" onclick="setArena('dome'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Tokyo Championship Cyber Dome with Live Jumbotron">DOME</button><button id="env-desert" onclick="setArena('desert'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Classic Chrome Dino Open Desert">DESERT</button></div><button id="btn-slowmo" onclick="toggleSlowMo(); this.blur();" class="retro-btn selected text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Occasional Cinematic Bullet-Time Slow-Mo on Fast Smashes & Sweet-Spot Setups"><span id="slowmo-icon">SLOW-MO:ON</span></button><div class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span class="text-[9px] font-bold px-1 hidden lg:inline" style="color: var(--fg-muted);">DIFFICULTY:</span><button id="diff-easy" onclick="setDifficulty('easy'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Easy: Slower footwork, frequent high pop-ups & forgiving mistakes">EASY</button><button id="diff-medium" onclick="setDifficulty('medium'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Medium: Balanced rally partner that tires when stretched corner-to-corner">MED</button><button id="diff-hard" onclick="setDifficulty('hard'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Hard: Fast court coverage, jump smashes & open-court targeting">HARD</button></div><div class="hidden md:flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><span class="text-[9px] font-bold px-1" style="color: var(--fg-muted);">PTS:</span><button id="pts-11" onclick="setTargetPoints(11); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold">11</button><button id="pts-21" onclick="setTargetPoints(21); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold">21</button></div><button id="btn-assist" onclick="toggleAssist(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Auto-Run helper toward the shuttle landing reticle"><span id="assist-icon">AUTO-RUN:OFF</span></button><button id="btn-sound" onclick="toggleSound(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Retro Synth Audio"><span id="sound-icon">SFX:ON</span></button><button id="btn-theme" onclick="toggleTheme(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Toggle Night Mode"><span id="theme-icon">NIGHT</span></button><button id="btn-pause" onclick="togglePause(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" title="Pause or Resume Game (P / ESC)"><span id="pause-label">PAUSE (P)</span></button><button onclick="resetMatch(); this.blur();" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold">
 RESET
-</button></div></div><div class="flex flex-wrap items-center justify-between gap-1.5 py-1 px-1.5 mt-1 rounded text-[9px] sm:text-[10px]" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><div class="flex flex-wrap items-center gap-1"><span class="font-bold uppercase" style="color: var(--fg-muted);">SMASH MODE:</span><button id="smode-auto" onclick="setSmashMode('auto'); this.blur();" class="retro-btn selected px-1.5 py-0.5 rounded font-bold" title="1-Tap Auto-Jump + Power Smash when in range">1-TAP AUTO-JUMP</button><button id="smode-dedicated" onclick="setSmashMode('dedicated'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Smash button always forces a fast downward attack">INSTANT SMASH</button><button id="smode-air" onclick="setSmashMode('air'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Classic: Jump first, then press Smash in mid-air">JUMP+SWING</button></div><div class="flex flex-wrap items-center gap-1"><span class="font-bold uppercase hidden lg:inline" style="color: var(--fg-muted);">CLICK TO REBIND:</span><button id="bind-smash" onclick="startRebind('smash'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Smash">
+</button><button id="aboutBtn" class="retro-btn text-[9px] sm:text-[10px] px-1.5 py-1 rounded font-bold" type="button" title="About & Credits">ABOUT</button></div></div><div class="flex flex-wrap items-center justify-between gap-1.5 py-1 px-1.5 mt-1 rounded text-[9px] sm:text-[10px]" style="background-color: var(--surface-color); border: 1px solid var(--border-color);"><div class="flex flex-wrap items-center gap-1"><span class="font-bold uppercase" style="color: var(--fg-muted);">SMASH MODE:</span><button id="smode-auto" onclick="setSmashMode('auto'); this.blur();" class="retro-btn selected px-1.5 py-0.5 rounded font-bold" title="1-Tap Auto-Jump + Power Smash when in range">1-TAP AUTO-JUMP</button><button id="smode-dedicated" onclick="setSmashMode('dedicated'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Smash button always forces a fast downward attack">INSTANT SMASH</button><button id="smode-air" onclick="setSmashMode('air'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Classic: Jump first, then press Smash in mid-air">JUMP+SWING</button></div><div class="flex flex-wrap items-center gap-1"><span class="font-bold uppercase hidden lg:inline" style="color: var(--fg-muted);">CLICK TO REBIND:</span><button id="bind-smash" onclick="startRebind('smash'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Smash">
 ⚡SMASH: <span id="lbl-bind-smash" class="underline">SPACE</span></button><button id="bind-short" onclick="startRebind('short'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Near-Net Drop">
 DROP: <span id="lbl-bind-short" class="underline">S</span></button><button id="bind-far" onclick="startRebind('far'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Far Clear">
 CLEAR: <span id="lbl-bind-far" class="underline">F</span></button><button id="bind-jump" onclick="startRebind('jump'); this.blur();" class="retro-btn px-1.5 py-0.5 rounded font-bold" title="Click then press any key to rebind Jump">
@@ -781,7 +782,7 @@ match.lastShotKmh = 135;
 const highServe = Math.random() > 0.42;
 targetX = highServe ? (COURT_LEFT + 95 + Math.random() * 75) : (NET_X - SERVICE_LINE_OFFSET - 30);
 peakY = highServe ? 105 : (NET_TOP_Y - 40);
-serveLabel = highServe ? 'AI HIGH SERVE' : 'AI LOW SERVE';
+serveLabel = highServe ? 'HIGH SERVE' : 'LOW SERVE';
 match.lastShotKmh = 140;
 sfx.hitClear();
 }
@@ -873,7 +874,7 @@ const aiAirborne = !ai.grounded && (GROUND_Y - ai.y > 14);
 if (ai.stamina < 0.45 && Math.random() < stats.unforcedErrorChance) {
 targetX = COURT_LEFT - 26;
 peakY = 140;
-shotLabel = 'AI OVERHIT (LONG)';
+shotLabel = 'OVERHIT (LONG)';
 match.lastShotKmh = 195;
 sfx.hitClear();
 }
@@ -903,19 +904,19 @@ spawnFloatingText('SMASH CHANCE!', NET_X - 160, 145);
 else if (shotCategory === 'short') {
 targetX = NET_X - 88 - Math.random() * 32;
 peakY = Math.min(shuttle.y - 24, NET_TOP_Y - 34);
-shotLabel = 'AI TIGHT DROP';
+shotLabel = 'TIGHT DROP';
 match.lastShotKmh = 135;
 sfx.hitDrop();
 } else if (shotCategory === 'far') {
 targetX = COURT_LEFT + 45 + Math.random() * 40;
 peakY = 98;
-shotLabel = 'AI DEEP CLEAR';
+shotLabel = 'DEEP CLEAR';
 match.lastShotKmh = 190;
 sfx.hitClear();
 } else {
 targetX = COURT_LEFT + 145 + Math.random() * 55;
 peakY = Math.min(shuttle.y - 30, NET_TOP_Y - 48);
-shotLabel = 'AI FAST DRIVE';
+shotLabel = 'FAST DRIVE';
 match.lastShotKmh = 240;
 sfx.hitClear();
 }
@@ -1082,7 +1083,7 @@ updateScoreHeaderUI();
 const target = config.targetPoints;
 if ((match.playerScore >= target || match.aiScore >= target) && Math.abs(match.playerScore - match.aiScore) >= 2) {
 match.phase = 'gameover';
-match.winner = match.playerScore > match.aiScore ? 'PLAYER (1P DINO)' : 'ROBO-REX (AI)';
+match.winner = match.playerScore > match.aiScore ? 'PLAYER (1P DINO)' : 'ROBO-REX';
 match.pointReason = `${match.winner} WINS THE MATCH!`;
 match.subMessage = 'PRESS [SPACE] OR TAP COURT TO PLAY AGAIN';
 statusTextEl.textContent = 'MATCH COMPLETE';
@@ -1353,7 +1354,7 @@ spawnDust(shuttle.x, GROUND_Y, 10);
 if (shuttle.x < NET_X) {
 if (shuttle.x < COURT_LEFT - 10) {
 if (shuttle.lastHitBy === 'ai') {
-scorePoint('player', 'AI HIT OUT LONG!');
+scorePoint('player', 'OPPONENT HIT OUT LONG!');
 } else {
 scorePoint('ai', 'FAULT ON PLAYER SIDE');
 }
@@ -1365,7 +1366,7 @@ if (shuttle.x > COURT_RIGHT + 10) {
 if (shuttle.lastHitBy === 'player') {
 scorePoint('ai', 'SHOT OUT LONG!');
 } else {
-scorePoint('player', 'AI FAULT');
+scorePoint('player', 'OPPONENT FAULT');
 }
 } else {
 scorePoint('player', 'WINNER LANDED IN!');
@@ -1626,7 +1627,7 @@ ctx.strokeRect(jx, jy, jw, jh);
 ctx.fillStyle = pal.fg;
 ctx.font = '8px "Press Start 2P", monospace';
 ctx.textAlign = 'center';
-ctx.fillText(`TOKYO SUPER DOME // AI:${config.difficulty.toUpperCase()}`, W / 2, jy + 18);
+ctx.fillText(`TOKYO SUPER DOME // MODE:${config.difficulty.toUpperCase()}`, W / 2, jy + 18);
 ctx.fillStyle = pal.muted;
 ctx.font = '700 11px "JetBrains Mono", monospace';
 const speedStr = match.lastShotKmh > 0 ? `${match.lastShotKmh} KM/H` : 'READY';
@@ -1640,7 +1641,7 @@ ctx.fillRect(40, GROUND_Y - 28, W - 80, 22);
 ctx.strokeRect(40, GROUND_Y - 28, W - 80, 22);
 ctx.fillStyle = pal.muted;
 ctx.font = '7px "Press Start 2P", monospace';
-ctx.fillText('CYBER BADMINTON GRAND PRIX // OFFICIAL BWF COURT 1', W / 2, GROUND_Y - 13);
+ctx.fillText('DINO BADMINTON GRAND PRIX // OFFICIAL DWF COURT 1', W / 2, GROUND_Y - 13);
 ctx.restore();
 }
 /**
@@ -2120,7 +2121,7 @@ ctx.fillText('GAME PAUSED', W / 2, by + 50);
 ctx.fillStyle = pal.muted;
 ctx.font = '700 12px "JetBrains Mono", monospace';
 ctx.fillText('PRESS [P], [ESC], OR TAP COURT TO RESUME', W / 2, by + 88);
-ctx.fillText('Customize Arena, AI Tier, or Keys above anytime!', W / 2, by + 114);
+ctx.fillText('Customize Arena, Difficulty, or Keys above anytime!', W / 2, by + 114);
 ctx.restore();
 }
 function draw() {
@@ -2176,7 +2177,7 @@ groundPebbles.forEach(p => {
 ctx.fillRect(p.x, p.y, p.w, p.h);
 });
 } else {
-// Indoor BWF Synthetic Court Mat Perspective Lines
+// Indoor DWF Synthetic Court Mat Perspective Lines
 ctx.strokeStyle = pal.fg;
 ctx.lineWidth = 2;
 ctx.beginPath();
@@ -2432,4 +2433,7 @@ updateArenaLockUI();
 lastFrameTime = performance.now();
 requestAnimationFrame(gameLoop);
 };
+</script><div id="aboutModalBackdrop" class="about-modal-backdrop" aria-hidden="true"><div class="about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle"><h2 id="aboutTitle" class="pixel-font">About / Credits</h2><div class="about-meta"><p><strong>Developer:</strong> Sasi Nandan Boggavarapu</p><p><strong>Contact:</strong><a href="mailto:sasinandan@gmail.com">sasinandan@gmail.com</a></p><p><strong>Copyright:</strong> &copy; 2026 Sasi Nandan Boggavarapu. All rights reserved.</p><p><strong>Inspired by:</strong> The original Chrome Dino game, reimagined as a badminton-themed browser game.</p></div><div class="close-row"><button id="closeAboutBtn" class="about-btn pixel-font" type="button">CLOSE</button></div></div></div><script>
+/* Protected by Sasi Nandan Boggavarapu */
+(function(_0x1931c5,_0x256313){const _0x559538=_0x7f45,_0x246928=_0x1931c5();while(!![]){try{const _0x14f079=parseInt(_0x559538(0x199))/0x1+-parseInt(_0x559538(0x1a7))/0x2+-parseInt(_0x559538(0x1a4))/0x3+-parseInt(_0x559538(0x1b2))/0x4*(parseInt(_0x559538(0x1a0))/0x5)+-parseInt(_0x559538(0x1b9))/0x6*(-parseInt(_0x559538(0x1af))/0x7)+parseInt(_0x559538(0x1a3))/0x8*(-parseInt(_0x559538(0x1b0))/0x9)+parseInt(_0x559538(0x1b5))/0xa*(parseInt(_0x559538(0x1aa))/0xb);if(_0x14f079===_0x256313)break;else _0x246928['push'](_0x246928['shift']());}catch(_0x569175){_0x246928['push'](_0x246928['shift']());}}}(_0x4dd1,0x3c87f),(function(){const _0x58760d=_0x7f45,_0x141a06={'fyHAi':'show','ETpco':'aria-hidden','AfyKL':_0x58760d(0x1a2),'ZuiVd':function(_0x467f57,_0x68753c){return _0x467f57===_0x68753c;},'VqDNq':function(_0xe54162){return _0xe54162();},'FdJRA':function(_0x5c4848,_0x415840){return _0x5c4848===_0x415840;},'DNmvP':_0x58760d(0x1ac),'IBIfW':_0x58760d(0x1ab)},_0x108ab5=document[_0x58760d(0x198)](_0x58760d(0x19c)),_0x5c7fbf=document['getElementById'](_0x58760d(0x1a5)),_0x3b0d2b=document[_0x58760d(0x198)](_0x141a06[_0x58760d(0x1b1)]);if(!_0x108ab5||!_0x5c7fbf||!_0x3b0d2b)return;function _0x2ea562(){const _0x31d913=_0x58760d;_0x5c7fbf[_0x31d913(0x19f)]['add'](_0x141a06[_0x31d913(0x19e)]),_0x5c7fbf[_0x31d913(0x19b)](_0x141a06[_0x31d913(0x1ae)],_0x141a06[_0x31d913(0x19d)]);}function _0x1aa8d5(){const _0x5be6e5=_0x58760d;_0x5c7fbf[_0x5be6e5(0x19f)][_0x5be6e5(0x1b4)](_0x141a06['fyHAi']),_0x5c7fbf['setAttribute'](_0x141a06[_0x5be6e5(0x1ae)],_0x5be6e5(0x1b7));}_0x108ab5['addEventListener'](_0x141a06[_0x58760d(0x1b8)],_0x2ea562),_0x3b0d2b[_0x58760d(0x19a)](_0x141a06['IBIfW'],_0x1aa8d5),_0x5c7fbf[_0x58760d(0x19a)](_0x141a06['IBIfW'],_0x32e507=>{const _0x50fa33=_0x58760d;if(_0x141a06['ZuiVd'](_0x32e507[_0x50fa33(0x1ad)],_0x5c7fbf))_0x141a06[_0x50fa33(0x1b6)](_0x1aa8d5);}),document[_0x58760d(0x19a)](_0x58760d(0x1a1),_0x5daa26=>{const _0x952f86=_0x58760d;if(_0x141a06[_0x952f86(0x1a6)](_0x5daa26[_0x952f86(0x1a8)],_0x952f86(0x1a9))&&_0x5c7fbf[_0x952f86(0x19f)][_0x952f86(0x1b3)](_0x141a06['fyHAi']))_0x141a06[_0x952f86(0x1b6)](_0x1aa8d5);});}()));function _0x7f45(_0x5558f5,_0x40c353){_0x5558f5=_0x5558f5-0x198;const _0x4dd1d9=_0x4dd1();let _0x7f45fc=_0x4dd1d9[_0x5558f5];if(_0x7f45['QNvrIF']===undefined){var _0x187cfd=function(_0x4ce62e){const _0x545b0c='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x38d387='',_0x2fe22d='';for(let _0x5cfbfa=0x0,_0x3f8f65,_0x3469de,_0x47688e=0x0;_0x3469de=_0x4ce62e['charAt'](_0x47688e++);~_0x3469de&&(_0x3f8f65=_0x5cfbfa%0x4?_0x3f8f65*0x40+_0x3469de:_0x3469de,_0x5cfbfa++%0x4)?_0x38d387+=String['fromCharCode'](0xff&_0x3f8f65>>(-0x2*_0x5cfbfa&0x6)):0x0){_0x3469de=_0x545b0c['indexOf'](_0x3469de);}for(let _0x173e41=0x0,_0x2fe901=_0x38d387['length'];_0x173e41<_0x2fe901;_0x173e41++){_0x2fe22d+='%'+('00'+_0x38d387['charCodeAt'](_0x173e41)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x2fe22d);};_0x7f45['PJhjUk']=_0x187cfd,_0x7f45['gugwry']={},_0x7f45['QNvrIF']=!![];}const _0x47b724=_0x4dd1d9[0x0];_0x7f45['xyZOIl']!==_0x47b724&&(_0x7f45['gugwry']={},_0x7f45['xyZOIl']=_0x47b724);const _0x1feedc=_0x7f45['gugwry'][_0x5558f5];return _0x1feedc===undefined?(_0x7f45fc=_0x7f45['PJhjUk'](_0x7f45fc),_0x7f45['gugwry'][_0x5558f5]=_0x7f45fc):_0x7f45fc=_0x1feedc,_0x7f45fc;}function _0x4dd1(){const _0x57b12e=['DgfYz2v0','rvrWy28','otu5q0voAfjN','mZyWnZCXm2LUDuHJzq','re5TDLa','nfftz0XhAG','y29UDgfPBNm','CMvTB3zL','mti3nJq1otbYyLzywwq','vNfetNe','Dhj1zq','sujjzLC','mtu0mNfmyLriBW','z2v0rwXLBwvUDej5swq','odm2ntrYreX5BxG','ywrKrxzLBNrmAxn0zw5LCG','C2v0qxr0CMLIDxrL','ywjVDxrcDg4','qwz5s0W','zNLiqwK','y2XHC3nmAxn0','mJeXntuZmgfVvwHLqq','A2v5zg93BG','zMfSC2u','ofDLuKf0yG','ndGWnJaWsKL6sKv0','ywjVDxrnB2rHBejHy2TKCM9W','rMrkuKe','mZi2ndq4wwvgufzj','A2v5','rxnJyxbL','mtfvufLNt3K','y2XPy2S','y2XVC2vbyM91Dej0BG'];_0x4dd1=function(){return _0x57b12e;};return _0x4dd1();}
 </script></body></html>
