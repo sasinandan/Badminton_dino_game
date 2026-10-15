@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="author" content="sasinandan">
     <title>Dino Badminton - BWF World Tour Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -43,13 +42,15 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100dvh;
-            overflow: hidden;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             background-color: var(--bg-color);
             color: var(--fg-color);
             font-family: 'JetBrains Mono', monospace;
             transition: background-color 0.2s ease, color 0.2s ease;
-            touch-action: none;
+            touch-action: pan-y;
         }
 
         .pixel-font {
@@ -100,6 +101,9 @@
             box-shadow: 5px 5px 0px var(--border-color);
             background-color: var(--bg-color);
             position: relative;
+            width: 100%;
+            aspect-ratio: 960 / 460;
+            min-height: 250px;
         }
 
         canvas {
@@ -108,11 +112,11 @@
             height: 100%;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            touch-action: none;
+            touch-action: pan-y;
         }
     </style>
 </head>
-<body class="flex flex-col justify-between p-1.5 sm:p-2.5 select-none">
+<body class="flex flex-col justify-between p-1.5 sm:p-2.5 gap-1.5 select-none">
 
     <!-- SINGLE-LEVEL TOP NAVIGATION & CUSTOMIZATION BAR -->
     <header class="w-full max-w-6xl mx-auto shrink-0">
@@ -141,6 +145,13 @@
             <!-- Single-Level Interactive Controls Bar -->
             <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 justify-end">
                 
+                <!-- Character Selector (DINO vs STICK FIGHT) -->
+                <div class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+                    <span class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">CHAR:</span>
+                    <button id="char-dino" onclick="setCharacter('dino'); this.blur();" class="retro-btn selected text-[9px] px-1.5 py-0.5 rounded font-bold" title="Play as Pixel T-Rex Dino">DINO</button>
+                    <button id="char-stick" onclick="setCharacter('stick'); this.blur();" class="retro-btn text-[9px] px-1.5 py-0.5 rounded font-bold" title="Play as Stick Fight Brawler">STICK</button>
+                </div>
+
                 <!-- Arena Environment Selector (Locked During Active Match) -->
                 <div id="arena-selector-group" class="flex items-center rounded p-0.5 gap-0.5" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
                     <span id="arena-hdr-label" class="text-[9px] font-bold px-1 hidden xl:inline" style="color: var(--fg-muted);">ARENA:</span>
@@ -226,7 +237,7 @@
     </header>
 
     <!-- MAIN COURT CANVAS AREA -->
-    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center min-h-0 my-1">
+    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center my-1 shrink-0">
         
         <!-- Live Telemetry Strip -->
         <div class="flex flex-wrap items-center justify-between text-[10px] sm:text-xs font-bold mb-1 px-1 gap-2">
@@ -246,13 +257,13 @@
         </div>
 
         <!-- Responsive Pixel-Art Court Container -->
-        <div class="canvas-frame w-full flex-1 min-h-0 rounded overflow-hidden flex items-center justify-center">
+        <div class="canvas-frame rounded overflow-hidden flex items-center justify-center">
             <canvas id="gameCanvas" width="960" height="460"></canvas>
         </div>
     </main>
 
     <!-- SINGLE-LEVEL BOTTOM MOBILE & DESKTOP GAMEPAD DOCK -->
-    <footer class="w-full max-w-6xl mx-auto shrink-0 pt-0.5">
+    <footer class="w-full max-w-6xl mx-auto shrink-0 pt-0.5 pb-2">
         <div class="grid grid-cols-2 sm:grid-cols-12 gap-1.5 items-center">
             
             <!-- Left Thumb Pad: Movement & Jump -->
@@ -452,6 +463,7 @@
 
         // Game Configuration & State
         let config = {
+            character: 'dino',     // 'dino' (default), 'stick' (Stick Fight articulated brawler)
             arena: 'stadium',      // 'stadium' (default), 'dome', 'desert'
             slowMoEnabled: true,   // Occasional Focus Bullet-Time Slow-Mo on fast incoming AI attacks or high sweet-spot setups
             difficulty: 'medium',  // 'easy', 'medium', 'hard'
@@ -461,11 +473,15 @@
             darkMode: false
         };
 
-        // Load persisted Arena preference
+        // Load persisted Arena & Character preferences
         try {
             const savedArena = localStorage.getItem('dino_badminton_arena');
             if (savedArena && ['stadium', 'dome', 'desert'].includes(savedArena)) {
                 config.arena = savedArena;
+            }
+            const savedChar = localStorage.getItem('dino_badminton_char');
+            if (savedChar && ['dino', 'stick'].includes(savedChar)) {
+                config.character = savedChar;
             }
         } catch (e) {}
 
@@ -1868,40 +1884,82 @@
             ctx.fillStyle = pal.muted;
             ctx.fillRect(ux - 10, seatY - 3, 20, 5);
 
-            // Seated Pixel Dino Umpire Character (head turns to follow the shuttlecock!)
+            // Seated Umpire Character (Dino or Stick Figure — head turns to follow the shuttlecock!)
             const lookDir = shuttle.x < NET_X ? -1 : 1;
             ctx.save();
             ctx.translate(ux, seatY - 3);
 
-            // Umpire Torso & Official Sweater Vest
-            ctx.fillStyle = pal.fg;
-            ctx.fillRect(-5, -16, 10, 16);
-            ctx.fillStyle = pal.bg;
-            ctx.fillRect(-2, -15, 4, 5); // Collar
+            if (config.character === 'stick') {
+                ctx.strokeStyle = pal.fg;
+                ctx.fillStyle = pal.fg;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
 
-            // Dangling Dino Legs on Chair Footrest
-            ctx.fillStyle = pal.fg;
-            ctx.fillRect(-6, 0, 4, 9);
-            ctx.fillRect(1, 0, 4, 9);
+                // Stick Umpire Spine
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -16);
+                ctx.stroke();
 
-            // Umpire Arm raised during Point Score / Serve Call
-            if (match.phase === 'point_pause') {
-                const winDir = match.server === 'player' ? -1 : 1;
-                ctx.fillRect(winDir * 5, -22, winDir * 9, 3);
+                // Dangling Stick Legs
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-5, 5);
+                ctx.lineTo(-4, 11);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(5, 5);
+                ctx.lineTo(4, 11);
+                ctx.stroke();
+
+                // Stick Umpire Arm (raises on point score)
+                ctx.beginPath();
+                if (match.phase === 'point_pause') {
+                    const winDir = match.server === 'player' ? -1 : 1;
+                    ctx.moveTo(0, -13);
+                    ctx.lineTo(winDir * 10, -22);
+                } else {
+                    ctx.moveTo(0, -13);
+                    ctx.lineTo(lookDir * 6, -7);
+                }
+                ctx.stroke();
+
+                // Stick Umpire Head + Official Visor Cap
+                ctx.beginPath();
+                ctx.arc(0, -22, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillRect(lookDir > 0 ? 0 : -9, -25, 9, 2);
             } else {
-                ctx.fillRect(-8, -11, 5, 3);
-            }
+                // Umpire Torso & Official Sweater Vest
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(-5, -16, 10, 16);
+                ctx.fillStyle = pal.bg;
+                ctx.fillRect(-2, -15, 4, 5); // Collar
 
-            // Umpire Dino Head (turns left/right watching the shuttle)
-            ctx.save();
-            ctx.scale(lookDir, 1);
-            ctx.fillStyle = pal.fg;
-            ctx.fillRect(-4, -28, 13, 9);   // Snout & head
-            ctx.fillRect(-3, -30, 9, 2);    // Official Umpire Cap crown
-            ctx.fillRect(-3, -29, 14, 2);   // Cap visor
-            ctx.fillStyle = pal.bg;
-            ctx.fillRect(1, -26, 2, 2);     // Eye
-            ctx.restore();
+                // Dangling Dino Legs on Chair Footrest
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(-6, 0, 4, 9);
+                ctx.fillRect(1, 0, 4, 9);
+
+                // Umpire Arm raised during Point Score / Serve Call
+                if (match.phase === 'point_pause') {
+                    const winDir = match.server === 'player' ? -1 : 1;
+                    ctx.fillRect(winDir * 5, -22, winDir * 9, 3);
+                } else {
+                    ctx.fillRect(-8, -11, 5, 3);
+                }
+
+                // Umpire Dino Head (turns left/right watching the shuttle)
+                ctx.save();
+                ctx.scale(lookDir, 1);
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(-4, -28, 13, 9);   // Snout & head
+                ctx.fillRect(-3, -30, 9, 2);    // Official Umpire Cap crown
+                ctx.fillRect(-3, -29, 14, 2);   // Cap visor
+                ctx.fillStyle = pal.bg;
+                ctx.fillRect(1, -26, 2, 2);     // Eye
+                ctx.restore();
+            }
 
             ctx.restore();
             ctx.restore();
@@ -2181,6 +2239,214 @@
             ctx.restore();
         }
 
+        // Draw Articulated Stick Fight Character + Dynamic Limb Kinematics + Badminton Racket
+        function drawStickFighter(fighter, pal) {
+            ctx.save();
+            ctx.translate(Math.floor(fighter.x), Math.floor(fighter.y));
+
+            // Ground Shadow
+            const heightOffGround = Math.max(0, GROUND_Y - fighter.y);
+            const shadowWidth = Math.max(12, 26 - heightOffGround * 0.14);
+            ctx.fillStyle = pal.muted;
+            ctx.fillRect(-shadowWidth / 2, heightOffGround - 2, shadowWidth, 4);
+
+            // AI Stamina & Fatigue Bar Above Robo-Stick
+            if (fighter.isAI && match.phase === 'rally') {
+                const barW = 40;
+                const barH = 5;
+                ctx.fillStyle = pal.bg;
+                ctx.fillRect(-barW / 2, -84, barW, barH);
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(-barW / 2, -84, barW, barH);
+                ctx.fillStyle = fighter.stamina < 0.45 ? pal.muted : pal.fg;
+                ctx.fillRect(-barW / 2 + 1, -83, Math.max(2, (barW - 2) * fighter.stamina), barH - 2);
+            }
+
+            ctx.scale(fighter.facing, 1);
+
+            ctx.strokeStyle = pal.fg;
+            ctx.fillStyle = pal.fg;
+            ctx.lineWidth = 4.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Dynamic body lean based on velocity & swing state
+            const moveLean = (fighter.vx * fighter.facing) * 0.95;
+            const swingLean = fighter.swingTimer > 0 ? Math.sin((1 - fighter.swingTimer / fighter.swingDuration) * Math.PI) * 7 : 0;
+            const hipX = -moveLean * 0.25;
+            const hipY = !fighter.grounded ? -26 : -24;
+            const shoulderX = hipX + moveLean * 0.75 + swingLean;
+            const shoulderY = hipY - 24;
+            const headX = shoulderX + moveLean * 0.25 + swingLean * 0.25;
+            const headY = shoulderY - 12;
+
+            // 1. Articulated Legs (Hip -> Knee -> Foot, Stick Fight energetic springy style)
+            ctx.beginPath();
+            if (!fighter.grounded) {
+                // Mid-air dynamic jump-smash scissor kick pose
+                ctx.moveTo(hipX, hipY);
+                ctx.lineTo(hipX - 11, hipY + 10);
+                ctx.lineTo(hipX - 17, hipY + 21);
+
+                ctx.moveTo(hipX, hipY);
+                ctx.lineTo(hipX + 12, hipY + 8);
+                ctx.lineTo(hipX + 7, hipY + 21);
+            } else if (Math.abs(fighter.vx) > 0.3) {
+                // High-energy Stick Fight running cycle with knee joints
+                const phase = fighter.animRunFrame * 1.45;
+                const leg1Sin = Math.sin(phase);
+                const leg1Cos = Math.cos(phase);
+                const leg2Sin = Math.sin(phase + Math.PI);
+                const leg2Cos = Math.cos(phase + Math.PI);
+
+                const k1x = hipX + leg1Sin * 9 + 3;
+                const k1y = hipY + 12 - Math.max(0, leg1Cos * 4);
+                const f1x = hipX + leg1Sin * 15;
+                const f1y = Math.min(0, -Math.max(0, leg1Cos * 7));
+
+                const k2x = hipX + leg2Sin * 9 + 3;
+                const k2y = hipY + 12 - Math.max(0, leg2Cos * 4);
+                const f2x = hipX + leg2Sin * 15;
+                const f2y = Math.min(0, -Math.max(0, leg2Cos * 7));
+
+                ctx.moveTo(hipX, hipY);
+                ctx.lineTo(k1x, k1y);
+                ctx.lineTo(f1x, f1y);
+
+                ctx.moveTo(hipX, hipY);
+                ctx.lineTo(k2x, k2y);
+                ctx.lineTo(f2x, f2y);
+            } else {
+                // Athletic brawler combat ready stance
+                const idleBob = Math.sin(performance.now() * 0.008) * 1.5;
+                ctx.moveTo(hipX, hipY + idleBob);
+                ctx.lineTo(hipX - 8, hipY + 12);
+                ctx.lineTo(-11, 0);
+
+                ctx.moveTo(hipX, hipY + idleBob);
+                ctx.lineTo(hipX + 9, hipY + 12);
+                ctx.lineTo(11, 0);
+            }
+            ctx.stroke();
+
+            // 2. Spine / Torso
+            ctx.beginPath();
+            ctx.moveTo(hipX, hipY);
+            ctx.lineTo(shoulderX, shoulderY);
+            ctx.stroke();
+
+            // 3. Off-Hand Counter-Balance Arm (Elbow + Forearm)
+            ctx.beginPath();
+            ctx.moveTo(shoulderX, shoulderY + 3);
+            if (!fighter.grounded) {
+                ctx.lineTo(shoulderX - 12, shoulderY - 5);
+                ctx.lineTo(shoulderX - 18, shoulderY - 12);
+            } else if (fighter.swingTimer > 0) {
+                ctx.lineTo(shoulderX - 11, shoulderY + 6);
+                ctx.lineTo(shoulderX - 16, shoulderY + 12);
+            } else {
+                ctx.lineTo(shoulderX - 9, shoulderY + 9);
+                ctx.lineTo(shoulderX - 3, shoulderY + 15);
+            }
+            ctx.stroke();
+
+            // 4. Round Stick Fight Head
+            ctx.beginPath();
+            ctx.arc(headX, headY, 9.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Distinct Player vs Robo-Stick Headgear
+            if (!fighter.isAI) {
+                // Fluttering Stick Fight Ninja Headband
+                const wave = Math.sin(performance.now() * 0.016 + fighter.x * 0.08) * 4;
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(headX - 8, headY - 3);
+                ctx.lineTo(headX - 19, headY - 6 + wave);
+                ctx.lineTo(headX - 27, headY - 2 - wave * 0.6);
+                ctx.stroke();
+
+                // Intense squinting eye slit
+                ctx.fillStyle = pal.bg;
+                if (fighter.blinkTimer >= 0) {
+                    ctx.fillRect(headX + 2, headY - 3, 5, 2.5);
+                }
+            } else {
+                // Robo-Stick Glowing Cyber Visor & Antenna
+                ctx.fillStyle = pal.bg;
+                ctx.fillRect(headX + 1, headY - 3, 7, 3);
+                ctx.strokeStyle = pal.fg;
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(headX - 1, headY - 9);
+                ctx.lineTo(headX - 4, headY - 16);
+                ctx.stroke();
+                ctx.fillStyle = pal.fg;
+                ctx.fillRect(headX - 6, headY - 18, 4, 4);
+            }
+
+            // 5. Racket Arm + Badminton Racket + Swing Swoosh Arc
+            ctx.save();
+            ctx.translate(shoulderX + 3, shoulderY + 4);
+
+            let angle = -0.45;
+            if (fighter.swingTimer > 0) {
+                const progress = 1 - (fighter.swingTimer / fighter.swingDuration);
+                angle = -1.75 + Math.sin(progress * Math.PI) * 2.85;
+
+                // Motion Swoosh Arc
+                ctx.strokeStyle = pal.muted;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 40, -1.55, angle, false);
+                ctx.stroke();
+            }
+
+            ctx.rotate(angle);
+
+            // Stick Forearm reaching to grip racket handle
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -10);
+            ctx.stroke();
+
+            // Racket Handle & Shaft
+            ctx.fillStyle = pal.fg;
+            ctx.fillRect(-2, -30, 3, 24);
+
+            // Racket Head Hoop
+            ctx.strokeStyle = pal.fg;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, -43, 11, 14, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Cross Strings
+            ctx.strokeStyle = pal.muted;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-6, -43); ctx.lineTo(6, -43);
+            ctx.moveTo(-7, -38); ctx.lineTo(7, -38);
+            ctx.moveTo(-7, -48); ctx.lineTo(7, -48);
+            ctx.moveTo(0, -55);  ctx.lineTo(0, -31);
+            ctx.stroke();
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+        function drawFighter(fighter, pal) {
+            if (config.character === 'stick') {
+                drawStickFighter(fighter, pal);
+            } else {
+                drawDinoFighter(fighter, pal);
+            }
+        }
+
         function drawShuttlecock(pal) {
             const strikeX = player.x + 18;
             const strikeY = player.y - 46;
@@ -2376,8 +2642,10 @@
 
             ctx.font = '10px "Press Start 2P", monospace';
             ctx.fillStyle = pal.muted;
-            ctx.fillText('1P DINO', W / 2 - 110, 74);
-            ctx.fillText(`ROBO (${ai.aiMoodLabel})`, W / 2 + 110, 74);
+            const pLabel = config.character === 'stick' ? '1P STICK' : '1P DINO';
+            const aiPrefix = config.character === 'stick' ? 'CPU STICK' : 'ROBO';
+            ctx.fillText(pLabel, W / 2 - 110, 74);
+            ctx.fillText(`${aiPrefix} (${ai.aiMoodLabel})`, W / 2 + 110, 74);
 
             // Active Server Indicator
             ctx.fillStyle = pal.fg;
@@ -2442,9 +2710,9 @@
             // 7. Shuttle Landing Reticle
             drawLandingReticle(pal);
 
-            // 8. Fighters
-            drawDinoFighter(player, pal);
-            drawDinoFighter(ai, pal);
+            // 8. Fighters (Dino or Stick Fight Brawler)
+            drawFighter(player, pal);
+            drawFighter(ai, pal);
 
             // 9. Shuttlecock
             drawShuttlecock(pal);
@@ -2510,6 +2778,19 @@
             if (btn) btn.classList.toggle('selected', match.paused);
             if (pauseLabelEl) pauseLabelEl.textContent = match.paused ? 'RESUME (P)' : 'PAUSE (P)';
             sfx.pauseBeep();
+        }
+
+        function setCharacter(charKey) {
+            config.character = charKey;
+            ['dino', 'stick'].forEach(c => {
+                const btn = document.getElementById(`char-${c}`);
+                if (btn) btn.classList.toggle('selected', c === charKey);
+            });
+            try {
+                localStorage.setItem('dino_badminton_char', charKey);
+            } catch (e) {}
+            showStatusToast(charKey === 'stick' ? 'CHARACTER: STICK FIGHTER' : 'CHARACTER: PIXEL DINO');
+            sfx.hitClear();
         }
 
         function setArena(arenaKey) {
@@ -2670,6 +2951,7 @@
         }
 
         window.onload = function () {
+            setCharacter(config.character);
             setArena(config.arena);
             updateKeybindLabels();
             setupServe('player');
